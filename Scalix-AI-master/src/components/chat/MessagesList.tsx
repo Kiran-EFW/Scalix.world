@@ -19,6 +19,8 @@ import { useSettings } from "@/hooks/useSettings";
 import { useUserBudgetInfo } from "@/hooks/useUserBudgetInfo";
 import { PromoMessage } from "./PromoMessage";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChatUpgradeBanner, useChatUpgradeBanner } from "./ChatUpgradeBanner";
+import { chatNotify, schedule } from "@/lib/cloudNotifications";
 
 interface MessagesListProps {
   messages: Message[];
@@ -48,8 +50,42 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
     const setMessages = useSetAtom(chatMessagesAtom);
     const [isUndoLoading, setIsUndoLoading] = useState(false);
     const [isRetryLoading, setIsRetryLoading] = useState(false);
+
+    // Upgrade banner management
+    const { showBanner, BannerComponent } = useChatUpgradeBanner();
     const selectedChatId = useAtomValue(selectedChatIdAtom);
     const { userBudget } = useUserBudgetInfo();
+
+    // Detect when to show upgrade banners
+    React.useEffect(() => {
+      // Only show banners if user is not Pro and not in trial
+      const isProEnabled = settings?.enableScalixPro && settings?.proFeatures?.currentPlan !== 'free';
+      if (isProEnabled) return;
+
+      // Show trial banner if applicable
+      if (settings?.proFeatures?.expiresAt) {
+        const expiryDate = new Date(settings.proFeatures.expiresAt);
+        const daysLeft = Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        if (daysLeft <= 7) {
+          showBanner('trial', { daysLeft });
+          return;
+        }
+      }
+
+      // Show usage limit banner if budget exceeded
+      if (userBudget && userBudget.usedCredits >= userBudget.totalCredits) {
+        showBanner('usage', {
+          context: 'ai_tokens',
+          current: userBudget.usedCredits,
+          limit: userBudget.totalCredits
+        });
+        return;
+      }
+
+      // Show feature-specific banners based on recent actions
+      // This would be triggered by specific events in the chat
+
+    }, [settings, userBudget, showBanner]);
 
     return (
       <div
@@ -250,6 +286,10 @@ export const MessagesList = forwardRef<HTMLDivElement, MessagesListProps>(
               seed={messages.length * (appId ?? 1) * (selectedChatId ?? 1)}
             />
           )}
+
+        {/* Upgrade Banner */}
+        {BannerComponent}
+
         <div ref={messagesEndRef} />
       </div>
     );

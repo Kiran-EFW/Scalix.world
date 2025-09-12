@@ -2,6 +2,7 @@ import { IpcClient } from "@/ipc/ipc_client";
 import { X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { chatNotify, schedule } from "@/lib/cloudNotifications";
 
 export function ChatErrorBox({
   onDismiss,
@@ -13,6 +14,11 @@ export function ChatErrorBox({
   isScalixProEnabled: boolean;
 }) {
   if (error.includes("doesn't have a free quota tier")) {
+    // Show upgrade prompt for model access
+    schedule.showSmartNotification('upgrade_prompt', () => {
+      chatNotify.showModelUpgradePrompt('premium-models', 'quota-limit');
+    });
+
     return (
       <ChatErrorContainer onDismiss={onDismiss}>
         {error}
@@ -64,14 +70,19 @@ export function ChatErrorBox({
     );
   }
   if (isScalixProEnabled && error.includes("ExceededBudget:")) {
+    // Show usage limit notification
+    schedule.showSmartNotification('usage_limit', () => {
+      chatNotify.showUsageUpgradePrompt('ai_tokens', 0, 0); // Will show generic upgrade message
+    });
+
     return (
       <ChatInfoContainer onDismiss={onDismiss}>
         <span>
           You have used all of your Scalix AI credits this month.{" "}
-          <ExternalLink href="https://academy.scalix.world/subscription">
-            Upgrade to Scalix Max
+          <ExternalLink href="https://scalix.world/pro">
+            Upgrade to Pro
           </ExternalLink>{" "}
-          and get more AI credits
+          for unlimited AI tokens!
         </span>
       </ChatInfoContainer>
     );

@@ -1111,6 +1111,48 @@ export class IpcClient {
     return this.ipcRenderer.invoke("get-user-budget");
   }
 
+  // Cloud sync methods
+  public async syncDesktopWithCloud(): Promise<{
+    success: boolean;
+    apiKey?: string;
+    plan?: string;
+    limits?: any;
+    features?: string[];
+    error?: string;
+  }> {
+    return this.ipcRenderer.invoke("cloud:sync-desktop");
+  }
+
+  public async handleWebLoginSync(webToken: string): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    return this.ipcRenderer.invoke("cloud:web-login-sync", webToken);
+  }
+
+  public async setDesktopAuthToken(token: string): Promise<boolean> {
+    return this.ipcRenderer.invoke("cloud:set-auth-token", token);
+  }
+
+  public async clearDesktopAuthToken(): Promise<boolean> {
+    return this.ipcRenderer.invoke("cloud:clear-auth-token");
+  }
+
+  public async getCloudAuthStatus(): Promise<{
+    hasToken: boolean;
+    lastSync?: string;
+    cloudSyncEnabled: boolean;
+  }> {
+    return this.ipcRenderer.invoke("cloud:get-auth-status");
+  }
+
+  public async triggerCloudSync(): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    return this.ipcRenderer.invoke("cloud:trigger-sync");
+  }
+
   public async getChatContextResults(params: {
     appId: number;
   }): Promise<ContextPathResults> {

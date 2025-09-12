@@ -236,6 +236,29 @@ export const UserSettingsSchema = z.object({
   runtimeMode2: RuntimeMode2Schema.optional(),
 
   ////////////////////////////////
+  // CLOUD SYNC & BUSINESS LOGIC
+  ////////////////////////////////
+  cloudSyncEnabled: z.boolean().optional().default(false),
+  lastCloudSync: z.string().optional(), // ISO timestamp
+  offlineMode: z.boolean().optional().default(false),
+
+  // Enhanced Pro settings with cloud data
+  proFeatures: z.object({
+    lastValidated: z.string().optional(),
+    currentPlan: z.enum(['free', 'pro', 'enterprise']).optional(),
+    usageLimits: z.object({
+      maxAiTokens: z.number(),
+      maxApiCalls: z.number(),
+      maxStorage: z.number(),
+      maxTeamMembers: z.number(),
+      advancedFeatures: z.boolean(),
+      prioritySupport: z.boolean()
+    }).optional(),
+    features: z.array(z.string()).optional(),
+    expiresAt: z.string().optional() // ISO timestamp
+  }).optional(),
+
+  ////////////////////////////////
   // E2E TESTING ONLY.
   ////////////////////////////////
   isTestMode: z.boolean().optional(),

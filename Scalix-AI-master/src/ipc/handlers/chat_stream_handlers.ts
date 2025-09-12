@@ -27,6 +27,7 @@ import { processFullResponseActions } from "../processors/response_processor";
 import { streamTestResponse } from "./testing_chat_handlers";
 import { getTestResponse } from "./testing_chat_handlers";
 import { getModelClient, ModelClient } from "../utils/get_model_client";
+import { trackUsageWithCloud } from "../utils/scalix_auth";
 import log from "electron-log";
 import {
   getSupabaseContext,
@@ -1052,6 +1053,35 @@ ${problemReport.problems
           } catch (error) {
             logger.error(`Error scheduling file deletion: ${error}`);
           }
+        }
+      }
+
+      // Track usage with cloud API (cost-optimized)
+      if (fullResponse && settings?.enableScalixPro && !settings?.offlineMode) {
+        try {
+          const apiKey = settings.providerSettings?.auto?.apiKey?.value;
+          if (apiKey) {
+            // Estimate token usage (rough calculation: ~4 chars per token)
+            const estimatedTokens = Math.ceil(fullResponse.length / 4);
+
+            // Track AI tokens used
+            await trackUsageWithCloud(apiKey, 'ai_tokens', estimatedTokens, {
+              chatId: req.chatId,
+              model: settings.selectedModel?.name || 'unknown',
+              feature: 'chat_response'
+            });
+
+            // Track API call
+            await trackUsageWithCloud(apiKey, 'api_calls', 1, {
+              chatId: req.chatId,
+              endpoint: 'chat_stream'
+            });
+
+            logger.debug(`Tracked usage: ${estimatedTokens} tokens, 1 API call`);
+          }
+        } catch (error) {
+          logger.warn('Failed to track usage:', error);
+          // Don't fail the request if usage tracking fails
         }
       }
 

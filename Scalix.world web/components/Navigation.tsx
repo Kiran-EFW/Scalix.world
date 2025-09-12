@@ -5,15 +5,15 @@ import Link from 'next/link'
 import { Button } from './ui/Button'
 import { SignInModal } from './auth/SignInModal'
 import { ProModeSelector } from './pro/ProModeSelector'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/lib/store'
+import { UserMenu } from './auth/UserMenu'
+import { useAuth } from '@/hooks/useAuth'
 import { motion } from 'framer-motion'
 
 export function Navigation() {
   const [isSignInOpen, setIsSignInOpen] = useState(false)
-  const { user } = useSelector((state: RootState) => state.auth)
+  const { user } = useAuth()
 
-  const hasProKey = user?.plan === 'pro' || user?.plan === 'team' || user?.plan === 'enterprise'
+  const hasProKey = user?.plan === 'pro' || user?.plan === 'enterprise'
 
   return (
     <>
@@ -78,33 +78,7 @@ export function Navigation() {
               )}
 
               {user ? (
-                <div className="flex items-center space-x-3">
-                  <div className="hidden md:flex items-center space-x-2">
-                    <span className="text-sm text-gray-700">
-                      Welcome, {user.name || user.email.split('@')[0]}
-                    </span>
-                    {hasProKey && (
-                      <span className="px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full">
-                        {user.plan}
-                      </span>
-                    )}
-                  </div>
-                  <Link href="/dashboard">
-                    <Button variant="outline" className="text-gray-600 hover:text-gray-900">
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      // Handle logout
-                      window.location.href = '/auth/signin'
-                    }}
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Sign Out
-                  </Button>
-                </div>
+                <UserMenu user={user} />
               ) : (
                 <>
                   <Button

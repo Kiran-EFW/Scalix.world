@@ -94,6 +94,13 @@ const validInvokeChannels = [
   "rename-branch",
   "clear-session-data",
   "get-user-budget",
+  // Cloud sync
+  "cloud:sync-desktop",
+  "cloud:web-login-sync",
+  "cloud:set-auth-token",
+  "cloud:clear-auth-token",
+  "cloud:get-auth-status",
+  "cloud:trigger-sync",
   "get-context-paths",
   "set-context-paths",
   "get-app-upgrades",

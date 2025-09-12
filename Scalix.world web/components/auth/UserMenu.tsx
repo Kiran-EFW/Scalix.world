@@ -128,26 +128,35 @@ export function UserMenu({ user }: UserMenuProps) {
                 Dashboard
               </Link>
               <Link
-                href="/settings"
+                href="/auth/profile"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Settings
+                Profile Settings
               </Link>
               <Link
-                href="/billing"
+                href="/dashboard/billing"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Billing
+                Billing & Plans
               </Link>
               <Link
-                href="/support"
+                href="/dashboard/usage"
                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Support
+                Usage & Analytics
               </Link>
+              {user.plan === 'enterprise' && (
+                <Link
+                  href="/admin"
+                  className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Admin Panel
+                </Link>
+              )}
             </div>
 
             <div className="border-t border-gray-200 py-2">

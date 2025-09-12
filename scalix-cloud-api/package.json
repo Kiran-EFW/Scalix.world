@@ -1,0 +1,30 @@
+{
+  "name": "scalix-cloud-api",
+  "version": "1.0.0",
+  "description": "Cost-optimized cloud API for Scalix using Firestore",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "dev-server": "node server-dev.js",
+    "init-db": "node scripts/init-db.js",
+    "test": "node test-api.js",
+    "test:local": "API_BASE=http://localhost:8080 node test-api.js",
+    "test:dev": "API_BASE=http://localhost:3000 node test-api.js"
+  },
+  "keywords": ["scalix", "api", "firestore", "serverless"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.5.0",
+    "helmet": "^8.1.0",
+    "rate-limiter-flexible": "^7.3.0",
+    "stripe": "^14.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
