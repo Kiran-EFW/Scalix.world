@@ -1,0 +1,168 @@
+model_list:
+  # ==========================================
+  # FREE TIER MODELS (No API Key Required)
+  # ==========================================
+
+  # Google Gemini 2.5 Flash - Best free model for coding
+  - model_name: free-gemini-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: ${GEMINI_API_KEY}
+      metadata:
+        tier: free
+        priority: 1
+        category: coding
+        description: "Google's fastest Gemini model, excellent for coding tasks"
+
+  # Google Gemini Pro - Solid backup for free tier
+  - model_name: free-gemini-pro
+    litellm_params:
+      model: gemini/gemini-pro
+      api_key: ${GEMINI_API_KEY}
+      metadata:
+        tier: free
+        priority: 2
+        category: general
+        description: "Google's advanced Gemini model for complex tasks"
+
+  # DeepSeek Chat v3 - Good reasoning model
+  - model_name: free-deepseek-chat
+    litellm_params:
+      model: openrouter/deepseek/deepseek-chat-v3-0324:free
+      api_key: ${DEEPSEEK_API_KEY}
+      metadata:
+        tier: free
+        priority: 3
+        category: reasoning
+        description: "DeepSeek's advanced reasoning model"
+
+  # WizardLM 2 - Coding focused
+  - model_name: free-wizardlm
+    litellm_params:
+      model: openrouter/microsoft/wizardlm-2-8x22b
+      api_key: ${OPENROUTER_API_KEY}
+      metadata:
+        tier: free
+        priority: 4
+        category: coding
+        description: "Microsoft's WizardLM for coding assistance"
+
+  # ==========================================
+  # PRO TIER MODELS (Scalix Pro)
+  # ==========================================
+
+  # Scalix Engine - Advanced processing with lazy edits
+  - model_name: scalix-engine
+    litellm_params:
+      model: openai-compatible/scalix-engine
+      api_key: ${SCALIX_PRO_API_KEY}
+      base_url: ${SCALIX_ENGINE_URL}
+      metadata:
+        tier: pro
+        features: ["lazy_edits", "smart_context", "advanced_reasoning"]
+        description: "Scalix Engine with advanced AI processing"
+
+  # Scalix Gateway - Optimized routing
+  - model_name: scalix-gateway
+    litellm_params:
+      model: openai-compatible/scalix-gateway
+      api_key: ${SCALIX_PRO_API_KEY}
+      base_url: ${SCALIX_GATEWAY_URL}
+      metadata:
+        tier: pro
+        features: ["optimized_routing", "enhanced_performance"]
+        description: "Scalix Gateway with optimized performance"
+
+  # ==========================================
+  # STANDARD PROVIDER MODELS (Paid)
+  # ==========================================
+
+  # OpenAI Models
+  - model_name: gpt-4
+    litellm_params:
+      model: gpt-4
+      api_key: ${OPENAI_API_KEY}
+      metadata:
+        tier: premium
+        provider: openai
+        description: "OpenAI GPT-4 for premium users"
+
+  - model_name: gpt-4-turbo
+    litellm_params:
+      model: gpt-4-turbo-preview
+      api_key: ${OPENAI_API_KEY}
+      metadata:
+        tier: premium
+        provider: openai
+        description: "OpenAI GPT-4 Turbo for faster responses"
+
+  # Anthropic Models
+  - model_name: claude-3-opus
+    litellm_params:
+      model: claude-3-opus-20240229
+      api_key: ${ANTHROPIC_API_KEY}
+      metadata:
+        tier: premium
+        provider: anthropic
+        description: "Anthropic Claude 3 Opus - most capable"
+
+  - model_name: claude-3-sonnet
+    litellm_params:
+      model: claude-3-sonnet-20240229
+      api_key: ${ANTHROPIC_API_KEY}
+      metadata:
+        tier: premium
+        provider: anthropic
+        description: "Anthropic Claude 3 Sonnet - balanced performance"
+
+  # Google Models
+  - model_name: gemini-pro
+    litellm_params:
+      model: gemini/gemini-pro
+      api_key: ${GEMINI_API_KEY}
+      metadata:
+        tier: premium
+        provider: google
+        description: "Google Gemini Pro for premium users"
+
+general_settings:
+  master_key: ${LITELLM_MASTER_KEY}
+  database_url: ${DATABASE_URL}
+  # Enable CORS for web app
+  cors:
+    allow_origins: ["*"]
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+
+# Router settings for intelligent model selection
+router_settings:
+  routing_strategy: usage-based-routing
+  redis_host: ${REDIS_HOST}
+  redis_port: ${REDIS_PORT}
+
+  # Free tier specific limits
+  free_tier_limits:
+    requests_per_hour: 10
+    requests_per_day: 50
+    tokens_per_day: 10000
+
+  # Pro tier limits (higher)
+  pro_tier_limits:
+    requests_per_hour: 100
+    requests_per_day: 1000
+    tokens_per_day: 100000
+
+# Custom callbacks for Scalix-specific tracking
+success_callback: ["scalix_usage_tracker", "scalix_cost_calculator"]
+failure_callback: ["scalix_error_handler"]
+
+# Logging configuration
+logging:
+  level: ${LITELLM_LOG_LEVEL}
+  file: ${LITELLM_LOG_FILE}
+
+# Health check settings
+health_check:
+  enabled: true
+  frequency: 30  # seconds
+  timeout: 10    # seconds

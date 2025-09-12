@@ -1,0 +1,60 @@
+import log from "electron-log";
+import { createLoggedHandler } from "./safe_handle";
+import { readSettings } from "../../main/settings"; // Assuming settings are read this way
+import { UserBudgetInfo, UserBudgetInfoSchema } from "../ipc_types";
+import { IS_TEST_BUILD } from "../utils/test_utils";
+import { getScalixUserInfo, SCALIX_API_ENDPOINTS } from "../utils/scalix_auth";
+
+const logger = log.scope("pro_handlers");
+const handle = createLoggedHandler(logger);
+
+const CONVERSION_RATIO = (10 * 3) / 2;
+
+export function registerProHandlers() {
+  // This method should try to avoid throwing errors because this is auxiliary
+  // information and isn't critical to using the app
+  handle("get-user-budget", async (): Promise<UserBudgetInfo | null> => {
+    if (IS_TEST_BUILD) {
+      // Avoid spamming the API in E2E tests.
+      return null;
+    }
+    logger.info("Attempting to fetch user budget information from Scalix API.");
+
+    const settings = readSettings();
+
+    const scalixApiKey = settings.providerSettings?.auto?.apiKey?.value;
+
+    if (!scalixApiKey) {
+      logger.error("Scalix Pro API key is not configured.");
+      return null;
+    }
+
+    try {
+      // Use the new Scalix authentication system
+      const userInfoResponse = await getScalixUserInfo({
+        apiKey: scalixApiKey,
+        timeout: 10000,
+        retries: 3,
+      });
+
+      if (!userInfoResponse || !userInfoResponse.user_info) {
+        logger.error("Invalid response format from Scalix API");
+        return null;
+      }
+
+      const userInfoData = userInfoResponse.user_info;
+      logger.info("Successfully fetched user budget information from Scalix API.");
+
+      return UserBudgetInfoSchema.parse({
+        usedCredits: userInfoData.spend * CONVERSION_RATIO,
+        totalCredits: userInfoData.max_budget * CONVERSION_RATIO,
+        budgetResetDate: new Date(userInfoData.budget_reset_at),
+      });
+
+    } catch (error: any) {
+      logger.error(`Error fetching user budget from Scalix API: ${error.message}`, error);
+      return null;
+    }
+  });
+}
+

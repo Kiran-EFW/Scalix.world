@@ -1,0 +1,12 @@
+general_settings:
+  master_key: sk-scalix-dev-123456789
+  # Disable database for now to avoid Prisma setup complexity
+  database_url: ""
+model_list:
+  # Simple test model without external API dependencies
+  - model_name: test-model
+    litellm_params:
+      model: openai/gpt-3.5-turbo
+      api_key: test_key_placeholder
+      # Mock mode - won't actually call OpenAI
+      mock_response: "This is a mock response for testing."
