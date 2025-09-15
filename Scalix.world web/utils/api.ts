@@ -230,36 +230,7 @@ export const teamsApi = {
     }),
 }
 
-// Admin API
-export const adminApi = {
-  getUsers: (page = 1, limit = 50, search?: string) =>
-    apiRequest<{ users: any[]; pagination: any }>(
-      `/admin/users?page=${page}&limit=${limit}${search ? `&search=${search}` : ''}`
-    ),
-
-  getUser: (id: string) =>
-    apiRequest<{ user: any }>(`/admin/users/${id}`),
-
-  updateUser: (id: string, updates: any) =>
-    apiRequest<{ user: any }>(`/admin/users/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(updates),
-    }),
-
-  getAnalytics: (period = '30d') =>
-    apiRequest<{ analytics: any }>(`/admin/analytics?period=${period}`),
-
-  getSubscriptions: (page = 1, limit = 50) =>
-    apiRequest<{ subscriptions: any[]; pagination: any }>(
-      `/admin/subscriptions?page=${page}&limit=${limit}`
-    ),
-
-  createAnnouncement: (announcementData: any) =>
-    apiRequest<{ announcement: any }>('/admin/announcements', {
-      method: 'POST',
-      body: JSON.stringify(announcementData),
-    }),
-}
+// Admin API removed - moved to internal admin app
 
 // API Keys API
 export const apiKeysApi = {

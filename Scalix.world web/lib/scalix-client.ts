@@ -5,7 +5,40 @@
 // Provides consistent data access and user context management
 // ============================================================================
 
-import { ScalixClient } from '../../scalix-cloud-api/lib/client-sdk';
+// Base ScalixClient implementation
+class ScalixClient {
+  constructor(options = {}) {
+    this.baseUrl = options.baseUrl || 'http://localhost:8080';
+    this.apiKey = options.apiKey;
+    this.application = options.application || 'web';
+  }
+
+  async request(endpoint, options = {}) {
+    const url = `${this.baseUrl}${endpoint}`;
+    const config = {
+      method: options.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Application': this.application,
+        ...options.headers
+      },
+      ...options
+    };
+
+    if (this.apiKey) {
+      config.headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
+
+    const response = await fetch(url, config);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Network error' }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  }
+}
 
 class ScalixWebClient extends ScalixClient {
   constructor(options = {}) {

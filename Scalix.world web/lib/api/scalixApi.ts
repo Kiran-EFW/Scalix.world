@@ -142,16 +142,7 @@ export const scalixApi = createApi({
       invalidatesTags: ['Teams'],
     }),
 
-    // Admin endpoints
-    getUsers: builder.query({
-      query: ({ page = 1, limit = 20, search } = {}) =>
-        `/admin/users?page=${page}&limit=${limit}${search ? `&search=${search}` : ''}`,
-      providesTags: ['Admin'],
-    }),
-    getAnalytics: builder.query({
-      query: ({ period = '30d' } = {}) => `/admin/analytics?period=${period}`,
-      providesTags: ['Admin'],
-    }),
+    // Admin endpoints removed - moved to internal admin app
   }),
 })
 

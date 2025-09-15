@@ -148,15 +148,7 @@ export function UserMenu({ user }: UserMenuProps) {
               >
                 Usage & Analytics
               </Link>
-              {user.plan === 'enterprise' && (
-                <Link
-                  href="/admin"
-                  className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Admin Panel
-                </Link>
-              )}
+              {/* Admin Panel removed - moved to internal admin app */}
             </div>
 
             <div className="border-t border-gray-200 py-2">

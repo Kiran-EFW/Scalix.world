@@ -78,9 +78,13 @@ app.use('/api/', rateLimitMiddleware);
 // Apply data sync middleware
 app.use('/api/', withDataSync({ cache: true, realTime: false }));
 
-// Import data context and sync systems
+// Import all optimization systems
 const { DataContext, createDataContext, withDataContext, filterResponseData } = require('./lib/data-context');
 const { dataSyncManager, withDataSync, setupSyncEndpoints } = require('./lib/data-sync');
+const { updateManager } = require('./lib/electron-updates');
+const { notificationManager } = require('./lib/global-notifications');
+const { optimizationManager } = require('./lib/data-optimization');
+const { tierManager } = require('./lib/dynamic-tier-manager');
 
 // Middleware to detect application context
 app.use((req, res, next) => {
@@ -105,24 +109,405 @@ app.use((req, res, next) => {
 // Setup data sync endpoints
 setupSyncEndpoints(app);
 
+// ==========================================
+// ELECTRON UPDATE ENDPOINTS
+// ==========================================
+
+// Check for updates
+app.post('/api/electron/check-update', async (req, res) => {
+  try {
+    const updateInfo = await updateManager.checkForUpdates(req.body);
+    res.json(updateInfo);
+  } catch (error) {
+    console.error('Update check error:', error);
+    res.status(500).json({ error: 'Failed to check for updates' });
+  }
+});
+
+// Download update
+app.post('/api/electron/download-update', async (req, res) => {
+  try {
+    const { version, platform, arch } = req.body;
+    const userId = req.body.userId || 'anonymous';
+
+    await updateManager.recordUpdateDownload(userId, req.body.deviceId, version, platform, arch);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Download record error:', error);
+    res.status(500).json({ error: 'Failed to record download' });
+  }
+});
+
+// Get update stats (admin only)
+app.get('/api/admin/electron/updates', async (req, res) => {
+  try {
+    const stats = await updateManager.getUpdateStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Update stats error:', error);
+    res.status(500).json({ error: 'Failed to get update stats' });
+  }
+});
+
+// Publish update (admin only)
+app.post('/api/admin/electron/updates', async (req, res) => {
+  try {
+    const updateData = req.body;
+    const result = await updateManager.publishUpdate(updateData);
+    res.json(result);
+  } catch (error) {
+    console.error('Update publish error:', error);
+    res.status(500).json({ error: 'Failed to publish update' });
+  }
+});
+
+// ==========================================
+// GLOBAL NOTIFICATION ENDPOINTS
+// ==========================================
+
+// Broadcast global notification (admin only)
+app.post('/api/admin/notifications/broadcast', async (req, res) => {
+  try {
+    const notificationData = req.body;
+    const senderInfo = {
+      senderId: req.body.senderId || 'admin',
+      senderRole: 'admin'
+    };
+
+    const result = await notificationManager.broadcastNotification(notificationData, senderInfo);
+    res.json(result);
+  } catch (error) {
+    console.error('Broadcast error:', error);
+    res.status(500).json({ error: 'Failed to broadcast notification' });
+  }
+});
+
+// Send targeted notification (admin only)
+app.post('/api/admin/notifications/targeted', async (req, res) => {
+  try {
+    const { userIds, notificationData } = req.body;
+    const senderInfo = {
+      senderId: req.body.senderId || 'admin',
+      senderRole: 'admin'
+    };
+
+    const results = await notificationManager.sendTargetedNotification(userIds, notificationData, senderInfo);
+    res.json({ results });
+  } catch (error) {
+    console.error('Targeted notification error:', error);
+    res.status(500).json({ error: 'Failed to send targeted notifications' });
+  }
+});
+
+// Get notification stats (admin only)
+app.get('/api/admin/notifications/stats', async (req, res) => {
+  try {
+    const stats = await notificationManager.getNotificationStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Notification stats error:', error);
+    res.status(500).json({ error: 'Failed to get notification stats' });
+  }
+});
+
+// Mark notification as read
+app.post('/api/notifications/mark-read', async (req, res) => {
+  try {
+    const { notificationId, userId } = req.body;
+    await notificationManager.markNotificationRead(notificationId, userId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Mark read error:', error);
+    res.status(500).json({ error: 'Failed to mark notification as read' });
+  }
+});
+
+// ==========================================
+// DATA OPTIMIZATION ENDPOINTS
+// ==========================================
+
+// Get optimized data for Electron app
+app.get('/api/electron/optimized-data', async (req, res) => {
+  try {
+    const userId = req.query.userId || req.headers['x-user-id'];
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID required' });
+    }
+
+    const optimizedData = await optimizationManager.getOptimizedElectronData(userId, 'electron');
+    res.json(optimizedData);
+  } catch (error) {
+    console.error('Optimized data error:', error);
+    res.status(500).json({ error: 'Failed to get optimized data' });
+  }
+});
+
+// Get data optimization stats (admin only)
+app.get('/api/admin/optimization/stats', async (req, res) => {
+  try {
+    const stats = optimizationManager.getCacheStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Optimization stats error:', error);
+    res.status(500).json({ error: 'Failed to get optimization stats' });
+  }
+});
+
+// Clear user cache
+app.post('/api/admin/optimization/clear-cache', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (userId) {
+      optimizationManager.clearUserCache(userId);
+    } else {
+      // Clear all cache (admin only)
+      optimizationManager.cache.clear();
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Clear cache error:', error);
+    res.status(500).json({ error: 'Failed to clear cache' });
+  }
+});
+
+// ==========================================
+// DYNAMIC TIER MANAGEMENT ENDPOINTS
+// ==========================================
+
+// Get all tiers
+app.get('/api/admin/tiers', async (req, res) => {
+  try {
+    const tiers = await tierManager.getAllTiers();
+    res.json({ tiers });
+  } catch (error) {
+    console.error('Get tiers error:', error);
+    res.status(500).json({ error: 'Failed to get tiers' });
+  }
+});
+
+// Get specific tier
+app.get('/api/admin/tiers/:tierId', async (req, res) => {
+  try {
+    const { tierId } = req.params;
+    const tier = await tierManager.getTier(tierId);
+
+    if (!tier) {
+      return res.status(404).json({ error: 'Tier not found' });
+    }
+
+    res.json({ tier });
+  } catch (error) {
+    console.error('Get tier error:', error);
+    res.status(500).json({ error: 'Failed to get tier' });
+  }
+});
+
+// Create new tier
+app.post('/api/admin/tiers', async (req, res) => {
+  try {
+    const tierData = req.body;
+    const result = await tierManager.createTier(tierData);
+    res.json({ success: true, tier: result });
+  } catch (error) {
+    console.error('Create tier error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update tier
+app.put('/api/admin/tiers/:tierId', async (req, res) => {
+  try {
+    const { tierId } = req.params;
+    const updates = req.body;
+    const result = await tierManager.updateTier(tierId, updates);
+    res.json({ success: true, tier: result });
+  } catch (error) {
+    console.error('Update tier error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete tier
+app.delete('/api/admin/tiers/:tierId', async (req, res) => {
+  try {
+    const { tierId } = req.params;
+    await tierManager.deleteTier(tierId);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete tier error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update user tier
+app.put('/api/admin/users/:userId/tier', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { newTierId, notifyUser = true, updateApiKey = true } = req.body;
+
+    const result = await tierManager.updateUserTier(userId, newTierId, {
+      notifyUser,
+      updateApiKey
+    });
+
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error('Update user tier error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Bulk update user tiers
+app.post('/api/admin/users/bulk-update-tier', async (req, res) => {
+  try {
+    const { updates, notifyUsers = true, updateApiKeys = true } = req.body;
+
+    const results = await tierManager.bulkUpdateUserTiers(updates, {
+      notifyUsers,
+      updateApiKeys
+    });
+
+    const successful = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success).length;
+
+    res.json({
+      success: true,
+      summary: { total: results.length, successful, failed },
+      results
+    });
+  } catch (error) {
+    console.error('Bulk update tier error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update tier usage limits
+app.put('/api/admin/tiers/:tierId/limits', async (req, res) => {
+  try {
+    const { tierId } = req.params;
+    const { limits } = req.body;
+
+    const result = await tierManager.updateTierLimits(tierId, limits);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error('Update tier limits error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get tier analytics
+app.get('/api/admin/tiers/analytics', async (req, res) => {
+  try {
+    const analytics = await tierManager.getTierAnalytics();
+    res.json({ analytics });
+  } catch (error) {
+    console.error('Get tier analytics error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get public tiers (for user-facing apps)
+app.get('/api/tiers', async (req, res) => {
+  try {
+    const tiers = await tierManager.getAllTiers();
+    const publicTiers = tiers.filter(tier => tier.isActive && !tier.isInternal);
+    res.json({ tiers: publicTiers });
+  } catch (error) {
+    console.error('Get public tiers error:', error);
+    res.status(500).json({ error: 'Failed to get tiers' });
+  }
+});
+
+// Get user's current tier and limits
+app.get('/api/user/tier', async (req, res) => {
+  try {
+    const userId = req.query.userId || req.headers['x-user-id'];
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID required' });
+    }
+
+    const userDoc = await admin.firestore().collection('users').doc(userId).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userData = userDoc.data();
+    const tier = await tierManager.getTier(userData.tierId);
+
+    res.json({
+      tierId: userData.tierId,
+      tierName: userData.tierName,
+      limits: userData.tierLimits,
+      tier: tier ? {
+        displayName: tier.displayName,
+        features: tier.features,
+        price: tier.price
+      } : null
+    });
+  } catch (error) {
+    console.error('Get user tier error:', error);
+    res.status(500).json({ error: 'Failed to get user tier' });
+  }
+});
+
 // Routes
 app.get('/health', (req, res) => {
   const syncStats = dataSyncManager.getCacheStats();
+  const optimizationStats = optimizationManager.getCacheStats();
+  const notificationStats = notificationManager.getNotificationStats();
+  const updateStats = updateManager.getUpdateStats();
+
+  // Get tier management stats
+  const tierStats = tierManager ? tierManager.getTierStats() : {
+    totalTiers: 0,
+    activeTiers: 0,
+    totalUsers: 0,
+    tierDistribution: {}
+  };
 
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     application: req.application,
     version: process.env.npm_package_version || '1.0.0',
+    services: {
+      firestore: 'connected',
+      stripe: 'configured',
+      dataSync: 'active',
+      notifications: 'active',
+      electronUpdates: 'active',
+      dataOptimization: 'active',
+      dynamicTierManagement: 'active'
+    },
     sync: {
       cacheEntries: syncStats.totalEntries,
       cacheSize: `${(syncStats.totalSize / 1024).toFixed(2)} KB`,
       collections: Object.keys(syncStats.collections).length
     },
-    services: {
-      firestore: 'connected',
-      stripe: 'configured',
-      dataSync: 'active'
+    optimization: {
+      cacheEntries: optimizationStats.totalEntries,
+      cacheSize: `${(optimizationStats.totalSize / 1024).toFixed(2)} KB`,
+      efficiency: 'optimized'
+    },
+    notifications: {
+      active: notificationStats.activeNotifications,
+      delivered: notificationStats.totalDelivered,
+      connectedClients: notificationStats.connectedClients
+    },
+    updates: {
+      totalUpdates: updateStats.totalUpdates,
+      totalDownloads: updateStats.totalDownloads,
+      platforms: Object.keys(updateStats.platformStats || {}).length
+    },
+    tierManagement: {
+      totalTiers: tierStats.totalTiers,
+      activeTiers: tierStats.activeTiers,
+      totalUsers: tierStats.totalUsers,
+      tierDistribution: tierStats.tierDistribution,
+      cacheStatus: 'active',
+      lastTierUpdate: tierStats.lastTierUpdate || null
     }
   });
 });

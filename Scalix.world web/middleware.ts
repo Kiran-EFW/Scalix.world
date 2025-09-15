@@ -1,13 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Admin routes that require authentication
-const adminRoutes = [
-  '/admin',
-  '/admin/',
-  '/api/admin',
-  '/api/admin/',
-]
+// Admin routes removed - moved to internal admin app
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -45,43 +39,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check if this is an admin route
-  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
-
-  if (isAdminRoute) {
-    // Get the auth token from cookies or headers
-    const token = request.cookies.get('scalix_auth_token')?.value ||
-                  request.headers.get('authorization')?.replace('Bearer ', '')
-
-    if (!token) {
-      // Redirect to signin with return URL
-      const signinUrl = new URL('/auth/signin', request.url)
-      signinUrl.searchParams.set('returnUrl', pathname)
-      signinUrl.searchParams.set('error', 'Admin access required')
-      return NextResponse.redirect(signinUrl)
-    }
-
-    // For now, we'll allow the request to proceed
-    // In production, you'd validate the token with your auth service
-    // For development, we'll trust the token exists
-    if (process.env.NODE_ENV === 'development') {
-      return NextResponse.next()
-    }
-
-    // Production token validation would go here
-    // This is where you'd call your auth service to validate the token
-    // and check if the user has admin permissions
-
-    try {
-      // TODO: Implement proper token validation
-      // const decoded = jwt.verify(token, process.env.JWT_SECRET!)
-      // if (!decoded || !decoded.isAdmin) {
-      //   return NextResponse.redirect(new URL('/auth/signin?error=Insufficient permissions', request.url))
-      // }
-    } catch (error) {
-      return NextResponse.redirect(new URL('/auth/signin?error=Invalid token', request.url))
-    }
-  }
+  // Admin route protection removed - all admin functionality moved to internal admin app
 
   return NextResponse.next()
 }

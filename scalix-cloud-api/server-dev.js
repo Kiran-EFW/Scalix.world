@@ -8,12 +8,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3001', 'electron://scalix'],
+  origin: ['http://localhost:3000', 'http://localhost:3002', 'electron://scalix'],
   credentials: true
 }));
 app.use(express.json());

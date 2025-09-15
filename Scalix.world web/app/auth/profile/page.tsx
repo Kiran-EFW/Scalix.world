@@ -198,15 +198,7 @@ export default function ProfilePage() {
                   Usage & Analytics
                 </Link>
 
-                {user.plan === 'enterprise' && (
-                  <Link
-                    href="/admin"
-                    className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors"
-                  >
-                    <Settings className="w-4 h-4 mr-3" />
-                    Admin Panel
-                  </Link>
-                )}
+                {/* Admin Panel removed - moved to internal admin app */}
               </nav>
             </div>
           </div>
