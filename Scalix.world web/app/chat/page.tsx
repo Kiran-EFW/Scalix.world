@@ -8,6 +8,22 @@ import { Button } from '@/components/ui/Button'
 import { ChatInterface } from '@/components/chat/ChatInterface'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/lib/store'
+
+// Type definitions for chat functionality
+interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  timestamp: Date
+}
+
+interface Conversation {
+  id: string
+  title: string
+  messages: ChatMessage[]
+  model: string
+  createdAt: Date
+}
 import {
   MessageSquare,
   Settings,
@@ -91,8 +107,8 @@ export default function ChatPage() {
 
   const [selectedModel, setSelectedModel] = useState(availableModels[0])
   const [showModelSelector, setShowModelSelector] = useState(false)
-  const [conversations, setConversations] = useState([])
-  const [currentConversation, setCurrentConversation] = useState(null)
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Initialize with a welcome conversation
@@ -130,12 +146,12 @@ export default function ChatPage() {
     setIsSidebarOpen(false)
   }
 
-  const selectConversation = (conversation) => {
+  const selectConversation = (conversation: Conversation) => {
     setCurrentConversation(conversation)
     setIsSidebarOpen(false)
   }
 
-  const updateConversationMessages = (conversationId, messages) => {
+  const updateConversationMessages = (conversationId: string, messages: ChatMessage[]) => {
     setConversations(prev => prev.map(conv =>
       conv.id === conversationId
         ? { ...conv, messages, title: generateTitle(messages) }
@@ -147,7 +163,7 @@ export default function ChatPage() {
     )
   }
 
-  const generateTitle = (messages) => {
+  const generateTitle = (messages: ChatMessage[]) => {
     if (messages.length === 0) return 'New Chat'
     const firstUserMessage = messages.find(msg => msg.role === 'user')
     if (!firstUserMessage) return 'New Chat'

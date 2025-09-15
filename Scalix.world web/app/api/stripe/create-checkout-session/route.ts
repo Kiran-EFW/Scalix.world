@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrRetrieveCustomer, createCheckoutSession, STRIPE_PLANS, stripeConfig } from '@/lib/stripe'
-import { getServerSession } from 'next-auth'
 
 export async function POST(request: NextRequest) {
   try {

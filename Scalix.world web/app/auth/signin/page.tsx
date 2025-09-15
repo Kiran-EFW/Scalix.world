@@ -26,7 +26,7 @@ export default function SignInPage() {
   const { signIn, user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const returnUrl = searchParams.get('returnUrl') || '/dashboard'
+  const returnUrl = searchParams?.get('returnUrl') || '/dashboard'
 
   // Development mode auto-fill
   const isDevelopment = process.env.NODE_ENV === 'development'

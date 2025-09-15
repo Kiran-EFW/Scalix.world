@@ -75,7 +75,6 @@ export function MobileButton({
       whileTap={isTouchDevice ? { scale: 0.95 } : undefined}
       onClick={handleClick}
       disabled={disabled || loading}
-      {...props}
     >
       {loading && (
         <RefreshCw className="w-4 h-4 mr-2 animate-spin" />

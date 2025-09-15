@@ -1,10 +1,27 @@
 // User Types
+export type UserRole = 'user' | 'admin' | 'super_admin'
+
+export type Permission =
+  | 'view_admin_dashboard'
+  | 'manage_users'
+  | 'manage_plans'
+  | 'view_analytics'
+  | 'manage_system'
+  | 'view_security'
+  | 'manage_billing'
+  | 'view_api_keys'
+  | 'manage_api_keys'
+  | 'view_team_settings'
+  | 'manage_team_settings'
+
 export interface User {
   id: string
   email: string
   name?: string
   avatar?: string
   plan: 'free' | 'pro' | 'team' | 'enterprise'
+  role: UserRole
+  permissions: Permission[]
   createdAt: Date
   updatedAt: Date
   emailVerified: boolean
@@ -252,6 +269,51 @@ export interface ApiError {
 export interface ValidationError {
   field: string
   message: string
+}
+
+// Access Control Utilities
+export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
+  user: [],
+  admin: [
+    'view_admin_dashboard',
+    'view_analytics',
+    'view_security',
+    'view_api_keys',
+    'manage_api_keys',
+    'view_team_settings',
+    'manage_team_settings'
+  ],
+  super_admin: [
+    'view_admin_dashboard',
+    'manage_users',
+    'manage_plans',
+    'view_analytics',
+    'manage_system',
+    'view_security',
+    'manage_billing',
+    'view_api_keys',
+    'manage_api_keys',
+    'view_team_settings',
+    'manage_team_settings'
+  ]
+}
+
+export const hasPermission = (user: User | null, permission: Permission): boolean => {
+  if (!user) return false
+  return user.permissions.includes(permission) || ROLE_PERMISSIONS[user.role].includes(permission)
+}
+
+export const hasRole = (user: User | null, role: UserRole): boolean => {
+  if (!user) return false
+  return user.role === role || (role === 'admin' && user.role === 'super_admin')
+}
+
+export const isAdmin = (user: User | null): boolean => {
+  return hasRole(user, 'admin') || hasRole(user, 'super_admin')
+}
+
+export const isSuperAdmin = (user: User | null): boolean => {
+  return hasRole(user, 'super_admin')
 }
 
 // Generic Types

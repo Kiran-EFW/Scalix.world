@@ -45,7 +45,7 @@ export function DevModeIndicator() {
         {/* Close button */}
         <button
           onClick={() => {
-            const el = document.querySelector('[data-dev-indicator]')
+            const el = document.querySelector('[data-dev-indicator]') as HTMLElement
             if (el) el.style.display = 'none'
           }}
           className="absolute top-2 right-2 text-yellow-600 hover:text-yellow-800"

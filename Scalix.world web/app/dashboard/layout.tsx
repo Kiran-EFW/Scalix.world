@@ -77,10 +77,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">S</span>
-              </div>
+            <div className="flex items-center space-x-3">
+              <img
+                src="/scalix-logo.svg"
+                alt="Scalix Logo"
+                className="h-8 w-8"
+              />
               <span className="text-gray-900 font-semibold">Scalix</span>
             </div>
             <div className="w-10" /> {/* Spacer */}

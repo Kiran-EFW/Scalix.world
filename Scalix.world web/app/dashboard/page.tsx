@@ -54,58 +54,58 @@ export default function DashboardPage() {
       await new Promise(resolve => setTimeout(resolve, 2000))
 
       // Track performance
-      trackOperation('Dashboard refresh', startTime)
+      // trackOperation('Dashboard refresh', startTime)
 
-      // Show success notification
-      notifySuccess(
-        'Dashboard Updated',
-        'All metrics and data have been refreshed successfully.',
-        { duration: 3000 }
-      )
+      // Show success notification (temporarily disabled)
+      // notifySuccess(
+      //   'Dashboard Updated',
+      //   'All metrics and data have been refreshed successfully.',
+      //   { duration: 3000 }
+      // )
 
       setIsRefreshing(false)
     } catch (error) {
-      handleNetworkError(error, 'refresh dashboard')
+      // handleNetworkError(error, 'refresh dashboard')
       setIsRefreshing(false)
     }
   }
 
   // Demo notification functions for testing
   const showDemoNotifications = () => {
-    // Success notification
-    notifySuccess(
-      'Model Training Complete',
-      'Your AI model has been successfully trained and is ready for use.',
-      {
-        action: {
-          label: 'Test Model',
-          onClick: () => notifyInfo('Model Test', 'Running model validation tests...')
-        }
-      }
-    )
+    // Success notification (temporarily disabled)
+    // notifySuccess(
+    //   'Model Training Complete',
+    //   'Your AI model has been successfully trained and is ready for use.',
+    //   {
+    //     action: {
+    //       label: 'Test Model',
+    //       onClick: () => notifyInfo('Model Test', 'Running model validation tests...')
+    //     }
+    //   }
+    // )
 
-    // Warning notification
-    setTimeout(() => {
-      notifyWarning(
-        'High Resource Usage',
-        'Your current plan is using 85% of available resources.',
-        {
-          action: {
-            label: 'Upgrade Plan',
-            onClick: () => notifyInfo('Plan Upgrade', 'Redirecting to billing...')
-          }
-        }
-      )
-    }, 1000)
+    // Warning notification (temporarily disabled)
+    // setTimeout(() => {
+    //   notifyWarning(
+    //     'High Resource Usage',
+    //     'Your current plan is using 85% of available resources.',
+    //     {
+    //       action: {
+    //         label: 'Upgrade Plan',
+    //         onClick: () => notifyInfo('Plan Upgrade', 'Redirecting to billing...')
+    //       }
+    //     }
+    //   )
+    // }, 1000)
 
-    // System notification
-    setTimeout(() => {
-      notifySystem(
-        'Scheduled Maintenance',
-        'System maintenance is scheduled for tonight from 2:00 AM to 4:00 AM EST.',
-        { persistent: true }
-      )
-    }, 2000)
+    // System notification (temporarily disabled)
+    // setTimeout(() => {
+    //   notifySystem(
+    //     'Scheduled Maintenance',
+    //     'System maintenance is scheduled for tonight from 2:00 AM to 4:00 AM EST.',
+    //     { persistent: true }
+    //   )
+    // }, 2000)
   }
 
   // Check memory usage on mount
@@ -146,57 +146,58 @@ export default function DashboardPage() {
                   </motion.p>
                 </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center space-x-4"
-            >
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              >
-                <option value="1h">Last Hour</option>
-                <option value="24h">Last 24 Hours</option>
-                <option value="7d">Last 7 Days</option>
-                <option value="30d">Last 30 Days</option>
-              </select>
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center space-x-4"
+                >
+                  <select
+                    value={timeRange}
+                    onChange={(e) => setTimeRange(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="1h">Last Hour</option>
+                    <option value="24h">Last 24 Hours</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                  </select>
 
-              <Button
-                onClick={showDemoNotifications}
-                className="flex items-center bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                <Bell className="w-4 h-4 mr-2" />
-                Demo Notifications
-              </Button>
+                  <Button
+                    onClick={showDemoNotifications}
+                    className="flex items-center bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    Demo Notifications
+                  </Button>
 
-              <Button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh'}
-              </Button>
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                  </Button>
 
-              <Button variant="outline" className="flex items-center">
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
+                  <Button variant="outline" className="flex items-center">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export
+                  </Button>
 
-              <Button variant="outline" className="flex items-center">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
+                  <Button variant="outline" className="flex items-center">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
 
-              <Button variant="outline" className="flex items-center">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </motion.div>
+                  <Button variant="outline" className="flex items-center">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Button>
+                </motion.div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Quick Stats Bar */}
       <motion.div
@@ -227,78 +228,78 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-          {/* Main Dashboard Content */}
+        {/* Main Dashboard Content */}
         <main id="main-content" role="main" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" data-onboarding="dashboard">
-            {/* Quick Actions */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Link href="/chat">
-                  <Button className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700">
-                    <Activity className="w-4 h-4" />
-                    <span>AI Chat</span>
-                  </Button>
-                </Link>
-                <Link href="/dashboard/api-keys">
-                  <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
-                    <Settings className="w-4 h-4" />
-                    <span>API Keys</span>
-                  </Button>
-                </Link>
-                <Link href="/dashboard/billing">
-                  <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
-                    <BarChart3 className="w-4 h-4" />
-                    <span>Billing</span>
-                  </Button>
-                </Link>
-                <Link href="/docs">
-                  <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
-                    <Users className="w-4 h-4" />
-                    <span>Docs</span>
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
+          >
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link href="/chat">
+                <Button className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700">
+                  <Activity className="w-4 h-4" />
+                  <span>AI Chat</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/api-keys">
+                <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
+                  <Settings className="w-4 h-4" />
+                  <span>API Keys</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/billing">
+                <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Billing</span>
+                </Button>
+              </Link>
+              <Link href="/docs">
+                <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span>Docs</span>
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
 
-            {/* Recent Activity */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                <Link href="/dashboard/usage">
-                  <Button variant="outline" size="sm">View All</Button>
-                </Link>
+          {/* Recent Activity */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+              <Link href="/dashboard/usage">
+                <Button variant="outline" size="sm">View All</Button>
+              </Link>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 text-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-gray-600">API key "Production App" created</span>
+                <span className="text-gray-400 ml-auto">2 hours ago</span>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-600">API key "Production App" created</span>
-                  <span className="text-gray-400 ml-auto">2 hours ago</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-gray-600">15,420 API requests processed</span>
-                  <span className="text-gray-400 ml-auto">4 hours ago</span>
-                </div>
-                <div className="flex items-center space-x-3 text-sm">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span className="text-gray-600">Billing cycle started</span>
-                  <span className="text-gray-400 ml-auto">1 day ago</span>
-                </div>
+              <div className="flex items-center space-x-3 text-sm">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-gray-600">15,420 API requests processed</span>
+                <span className="text-gray-400 ml-auto">4 hours ago</span>
               </div>
-            </motion.div>
+              <div className="flex items-center space-x-3 text-sm">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span className="text-gray-600">Billing cycle started</span>
+                <span className="text-gray-400 ml-auto">1 day ago</span>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Temporarily disabled AdvancedAnalytics to fix loading issues */}
-      {/* <AdvancedAnalytics /> */}
+          {/* <AdvancedAnalytics /> */}
         </main>
 
         {/* API Performance Section */}

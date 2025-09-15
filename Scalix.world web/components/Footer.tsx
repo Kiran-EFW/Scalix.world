@@ -37,10 +37,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Logo and Description */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
+            <Link href="/" className="flex items-center space-x-3 mb-4">
+              <img
+                src="/scalix-logo.svg"
+                alt="Scalix Logo"
+                className="h-8 w-8"
+              />
               <span className="text-xl font-bold">Scalix</span>
             </Link>
             <p className="text-gray-400 mb-4 max-w-sm">

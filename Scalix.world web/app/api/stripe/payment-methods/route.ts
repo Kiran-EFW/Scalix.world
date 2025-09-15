@@ -4,6 +4,14 @@ import { createOrRetrieveCustomer } from '@/lib/stripe'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured. Please check your environment variables.' },
+        { status: 503 }
+      )
+    }
+
     // Get user session (you'll need to implement authentication)
     // const session = await getServerSession()
     // if (!session?.user?.email) {
@@ -50,6 +58,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured. Please check your environment variables.' },
+        { status: 503 }
+      )
+    }
+
     const { paymentMethodId } = await request.json()
 
     // Get user session (you'll need to implement authentication)
@@ -95,6 +111,14 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured. Please check your environment variables.' },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const paymentMethodId = searchParams.get('payment_method_id')
 

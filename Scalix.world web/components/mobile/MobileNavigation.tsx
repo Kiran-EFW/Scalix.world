@@ -398,7 +398,7 @@ export function MobileDrawer({
             `}
           >
             {/* Header */}
-            {(title || onClose) && (
+            {(title || (onClose && typeof onClose === 'function')) && (
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
                 {title && (
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

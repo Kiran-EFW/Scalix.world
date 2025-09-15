@@ -2,12 +2,16 @@
 
 import { useState, useEffect, createContext, useContext } from 'react'
 
+import { UserRole, Permission } from '@/types'
+
 interface User {
   id: string
   email: string
   name?: string
   avatar?: string
   plan: 'free' | 'pro' | 'team' | 'enterprise'
+  role: UserRole
+  permissions: Permission[]
   createdAt: Date
 }
 
@@ -41,6 +45,8 @@ export function useAuth(): AuthContextType {
             name: 'Scalix Admin',
             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
             plan: 'enterprise',
+            role: 'super_admin',
+            permissions: [],
             createdAt: new Date('2024-01-01'),
           }
 
@@ -77,6 +83,8 @@ export function useAuth(): AuthContextType {
                 name: 'Scalix Admin',
                 avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
                 plan: 'enterprise',
+                role: 'super_admin',
+                permissions: [],
                 createdAt: new Date('2024-01-01'),
               }
               localStorage.setItem('scalix_auth_token', 'dev-admin-token-2025')
@@ -121,6 +129,8 @@ export function useAuth(): AuthContextType {
           name: email?.split('@')[0] || 'Scalix Admin',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
           plan: 'enterprise',
+          role: 'super_admin',
+          permissions: [],
           createdAt: new Date('2024-01-01'),
         }
 
@@ -181,6 +191,8 @@ export function useAuth(): AuthContextType {
           name: email?.split('@')[0] || 'Scalix Admin',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
           plan: 'enterprise',
+          role: 'super_admin',
+          permissions: [],
           createdAt: new Date(),
         }
 

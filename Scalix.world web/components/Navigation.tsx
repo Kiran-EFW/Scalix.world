@@ -26,10 +26,12 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
+            <Link href="/" className="flex items-center space-x-3">
+              <img
+                src="/scalix-logo.svg"
+                alt="Scalix Logo"
+                className="h-8 w-8"
+              />
               <span className="text-xl font-bold text-gray-900">Scalix</span>
             </Link>
 
@@ -68,7 +70,12 @@ export function Navigation() {
               {/* Show Pro selector if user is logged in */}
               {user && (
                 <ProModeSelector
-                  settings={user}
+                  settings={{
+                    enableScalixPro: hasProKey,
+                    enableProLazyEditsMode: false,
+                    enableProSmartFilesContextMode: false,
+                    proSmartContextOption: undefined
+                  }}
                   onSettingsChange={(updates) => {
                     // Handle settings update
                     console.log('Settings update:', updates)

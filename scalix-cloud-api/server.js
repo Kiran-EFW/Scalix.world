@@ -75,9 +75,56 @@ const rateLimitMiddleware = async (req, res, next) => {
 // Apply rate limiting to all routes except health check
 app.use('/api/', rateLimitMiddleware);
 
+// Apply data sync middleware
+app.use('/api/', withDataSync({ cache: true, realTime: false }));
+
+// Import data context and sync systems
+const { DataContext, createDataContext, withDataContext, filterResponseData } = require('./lib/data-context');
+const { dataSyncManager, withDataSync, setupSyncEndpoints } = require('./lib/data-sync');
+
+// Middleware to detect application context
+app.use((req, res, next) => {
+  // Detect application from headers or request origin
+  const origin = req.headers.origin || req.headers.referer || '';
+  const userAgent = req.headers['user-agent'] || '';
+
+  let application = 'api'; // Default
+
+  if (origin.includes('localhost:3000') || origin.includes('scalix.world')) {
+    application = 'web';
+  } else if (origin.includes('localhost:3002') || req.headers['x-internal-admin']) {
+    application = 'internal-admin';
+  } else if (userAgent.includes('Electron') || req.headers['x-electron-app']) {
+    application = 'electron';
+  }
+
+  req.application = application;
+  next();
+});
+
+// Setup data sync endpoints
+setupSyncEndpoints(app);
+
 // Routes
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const syncStats = dataSyncManager.getCacheStats();
+
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    application: req.application,
+    version: process.env.npm_package_version || '1.0.0',
+    sync: {
+      cacheEntries: syncStats.totalEntries,
+      cacheSize: `${(syncStats.totalSize / 1024).toFixed(2)} KB`,
+      collections: Object.keys(syncStats.collections).length
+    },
+    services: {
+      firestore: 'connected',
+      stripe: 'configured',
+      dataSync: 'active'
+    }
+  });
 });
 
 // API Key validation route
@@ -386,17 +433,45 @@ function calculateUtilization(currentMonth, limits) {
 // Get all plans (admin only)
 app.get('/api/admin/plans', async (req, res) => {
   try {
+    // Mock user for now (would be set by authentication middleware)
+    const mockUser = {
+      id: 'admin-user',
+      role: 'super_admin',
+      permissions: ['view_admin_dashboard', 'manage_plans']
+    };
+
+    const dataContext = new DataContext(mockUser, req.application, req);
+
+    // Check if user can access plans
+    if (!await dataContext.canPerformAction('manage_plans', 'plans')) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
     const plansRef = db.collection('plans');
-    const snapshot = await plansRef.orderBy('price', 'asc').get();
+    let query = plansRef.orderBy('price', 'asc');
+
+    // Apply user context filters
+    query = await dataContext.applyFilters(query, 'plans');
+    const snapshot = await query.get();
 
     const plans = [];
     snapshot.forEach(doc => {
       plans.push({ id: doc.id, ...doc.data() });
     });
 
-    res.json({ plans });
+    // Filter response data
+    const filteredPlans = await dataContext.filterData(plans, 'plans');
+
+    // Log access
+    await dataContext.logDataAccess('view', 'plans', { count: filteredPlans.length });
+
+    res.json({
+      plans: filteredPlans,
+      context: await dataContext.getUserContext(),
+      total: filteredPlans.length
+    });
   } catch (error) {
-    logger.error('Error fetching plans:', error);
+    console.error('Error fetching plans:', error);
     res.status(500).json({ error: 'Failed to fetch plans' });
   }
 });

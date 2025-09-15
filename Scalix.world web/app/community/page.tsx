@@ -14,12 +14,13 @@ import {
   Trophy,
   ArrowRight,
   Github,
-  Discord,
+  Hash,
   Twitter,
   Youtube,
   ExternalLink,
   Heart,
-  Star
+  Star,
+  Clock
 } from 'lucide-react'
 
 const communityStats = [
@@ -91,7 +92,7 @@ const communityPlatforms = [
     name: 'Discord',
     description: 'Real-time chat, voice channels, and community events',
     members: '8.2K',
-    icon: <Discord className="w-6 h-6" />,
+    icon: <Hash className="w-6 h-6" />,
     color: 'bg-indigo-600',
     link: 'https://discord.gg/scalix',
     online: '1.2K'

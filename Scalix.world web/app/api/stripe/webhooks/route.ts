@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe, stripeConfig } from '@/lib/stripe'
-import { buffer } from 'micro'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured. Please check your environment variables.' },
+        { status: 503 }
+      )
+    }
     const body = await request.text()
     const sig = headers().get('stripe-signature')
 

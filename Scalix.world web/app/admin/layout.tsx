@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { Shield, Settings, Users, BarChart3, Server, Database } from 'lucide-react'
+import AdminProtected from '@/components/auth/AdminProtected'
 
 export const metadata: Metadata = {
   title: 'Scalix Admin Dashboard',
@@ -21,6 +22,8 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
+    <AdminProtected requiredPermission="admin">
+    
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Subtle Background Pattern */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -110,5 +113,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+    </AdminProtected>
   )
 }

@@ -42,7 +42,7 @@ const adminItems = [
 ]
 
 export function Sidebar({ isOpen, onToggle, className }: SidebarProps) {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const [isMobile, setIsMobile] = React.useState(false)
 
   React.useEffect(() => {

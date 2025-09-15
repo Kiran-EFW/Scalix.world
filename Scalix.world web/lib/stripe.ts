@@ -9,7 +9,7 @@ const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 let stripe: Stripe | null = null
 if (stripeSecretKey && stripeSecretKey !== 'sk_test_...' && !stripeSecretKey.includes('...')) {
   stripe = new Stripe(stripeSecretKey, {
-    apiVersion: '2023-10-16',
+    apiVersion: '2025-08-27.basil' as any,
     typescript: true,
   })
 }
@@ -157,7 +157,7 @@ export async function getCustomerSubscription(customerId: string) {
       return {
         id: subscription.id,
         status: subscription.status,
-        current_period_end: subscription.current_period_end,
+        current_period_end: subscription.current_period_end as number,
         plan_name: product.name,
         price_id: subscription.items.data[0].price.id,
       }
