@@ -7,7 +7,7 @@
 export const API_CONFIG = {
   BASE_URL: process.env.NODE_ENV === 'production'
     ? 'https://api.scalix.world'
-    : 'http://localhost:4000',
+    : 'http://localhost:8080',
   MASTER_KEY: 'sk-scalix-dev-123456789',
   TIMEOUT: 10000,
 }

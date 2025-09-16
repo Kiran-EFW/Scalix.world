@@ -23,8 +23,14 @@ import {
   ChevronDown,
   LogOut,
   Bell,
-  BellRing
+  BellRing,
+  Key,
+  Building2,
+  DollarSign,
+  MessageSquare,
+  Eye
 } from 'lucide-react'
+import { LogoAdmin } from '@/components/ui/logo'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import NotificationPanel from '@/components/notifications/NotificationPanel'
@@ -41,6 +47,12 @@ const navigationItems = [
   { name: 'System Health', href: '/system-health', icon: Shield },
   { name: 'Tier Management', href: '/tier-management', icon: Crown },
   { name: 'User Management', href: '/users', icon: Users },
+  { name: 'Team Management', href: '/team', icon: Users },
+  { name: 'API Keys', href: '/api-keys', icon: Key },
+  { name: 'Enterprise', href: '/enterprise', icon: Building2 },
+  { name: 'Billing', href: '/billing', icon: DollarSign },
+  { name: 'Support', href: '/support', icon: MessageSquare },
+  { name: 'User Monitoring', href: '/user-monitoring', icon: Eye },
   { name: 'Analytics', href: '/analytics', icon: TrendingUp },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -99,7 +111,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -110,20 +122,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Modern Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-card/95 backdrop-blur-xl border-r border-border/50 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-2xl lg:shadow-none lg:h-screen",
+        "fixed top-0 left-0 z-50 w-64 h-screen bg-card/95 backdrop-blur-xl border-r border-border/50 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-2xl lg:shadow-none flex-shrink-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex items-center justify-center h-16 px-4 border-b border-border/50 bg-gradient-to-r from-primary via-primary/90 to-primary/80 shadow-sm">
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <Shield className="w-8 h-8 text-primary-foreground" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+            <div className="flex items-center">
+              <LogoAdmin size="lg" />
+              <div className="ml-2">
+                <p className="text-xs text-primary-foreground/80">Internal Administration</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-primary-foreground tracking-tight">Scalix Admin</h1>
-              <p className="text-xs text-primary-foreground/80">Internal Portal</p>
-            </div>
-          </div>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -174,9 +182,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:ml-64">
+      <div className="flex-1 min-h-screen">
         {/* Modern Top bar */}
-        <header className="bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 py-2 shadow-sm">
+        <header className="bg-background/80 backdrop-blur-xl border-b border-border/50 px-4 py-2 shadow-sm sticky top-0 z-30">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
@@ -192,7 +200,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <h1 className="text-xl font-bold text-foreground tracking-tight">
                   {navigationItems.find(item => pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href)))?.name || 'Dashboard'}
                 </h1>
-                <p className="text-sm text-muted-foreground">Scalix Internal Administration</p>
+                <p className="text-sm text-muted-foreground">Powered by Scalix Cloud API</p>
               </div>
             </div>
 
@@ -304,7 +312,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Modern Page content */}
-        <main className="p-3 lg:p-4 animate-fade-in bg-gradient-to-br from-background via-background to-muted/10">
+        <main className="p-2 lg:p-3 animate-fade-in bg-gradient-to-br from-background via-background to-muted/10">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

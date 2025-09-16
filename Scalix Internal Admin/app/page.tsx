@@ -64,7 +64,7 @@ export default function AdminDashboard() {
                 <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
                   Welcome to Scalix Admin
                 </h1>
-                <p className="text-lg text-gray-700 max-w-2xl mb-4 font-medium">
+                <p className="text-lg text-foreground/90 max-w-2xl mb-4 font-medium">
                   Manage your Scalix infrastructure, monitor system performance, and configure settings
                   from this centralized administrative dashboard.
                 </p>
@@ -87,19 +87,19 @@ export default function AdminDashboard() {
 
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/30 border-blue-200 dark:border-blue-800 shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-blue-800">Total Users</CardTitle>
-                <div className="p-2 bg-blue-200 rounded-lg group-hover:bg-blue-300 transition-colors duration-300">
-                  <Users className="h-4 w-4 text-blue-600" />
+                <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-200">Total Users</CardTitle>
+                <div className="p-2 bg-blue-200 dark:bg-blue-800 rounded-lg group-hover:bg-blue-300 dark:group-hover:bg-blue-700 transition-colors duration-300">
+                  <Users className="h-4 w-4 text-blue-600 dark:text-blue-300" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-900 mb-2 animate-slide-up">
+                <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2 animate-slide-up">
                   {stats.totalUsers.toLocaleString()}
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center text-xs text-green-600">
+                  <div className="flex items-center text-xs text-green-600 dark:text-green-400">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     +12.5% from last month
                   </div>
@@ -108,19 +108,19 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
+            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/30 border-green-200 dark:border-green-800 shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-green-800">Active Sessions</CardTitle>
-                <div className="p-2 bg-green-200 rounded-lg group-hover:bg-green-300 transition-colors duration-300">
-                  <Activity className="h-4 w-4 text-green-600" />
+                <CardTitle className="text-sm font-medium text-green-800 dark:text-green-200">Active Sessions</CardTitle>
+                <div className="p-2 bg-green-200 dark:bg-green-800 rounded-lg group-hover:bg-green-300 dark:group-hover:bg-green-700 transition-colors duration-300">
+                  <Activity className="h-4 w-4 text-green-600 dark:text-green-300" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-900 mb-2 animate-slide-up" style={{ animationDelay: '100ms' }}>
+                <div className="text-2xl font-bold text-green-900 dark:text-green-100 mb-2 animate-slide-up" style={{ animationDelay: '100ms' }}>
                   {stats.activeUsers}
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center text-xs text-green-600">
+                  <div className="flex items-center text-xs text-green-600 dark:text-green-400">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     +8.2% currently online
                   </div>
@@ -137,40 +137,40 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg">
+            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/30 border-purple-200 dark:border-purple-800 shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-purple-800">Total Revenue</CardTitle>
-                <div className="p-2 bg-purple-200 rounded-lg group-hover:bg-purple-300 transition-colors duration-300">
-                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                <CardTitle className="text-sm font-medium text-purple-800 dark:text-purple-200">Total Revenue</CardTitle>
+                <div className="p-2 bg-purple-200 dark:bg-purple-800 rounded-lg group-hover:bg-purple-300 dark:group-hover:bg-purple-700 transition-colors duration-300">
+                  <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-300" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-purple-900 mb-2 animate-slide-up" style={{ animationDelay: '200ms' }}>
+                <div className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-2 animate-slide-up" style={{ animationDelay: '200ms' }}>
                   ${stats.totalRevenue.toLocaleString()}
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center text-xs text-green-600">
+                  <div className="flex items-center text-xs text-green-600 dark:text-green-400">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     +23.1% this month
                   </div>
-                  <div className="text-xs text-purple-600 font-medium">+${Math.floor(Math.random() * 1000)}</div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">+${Math.floor(Math.random() * 1000)}</div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg">
+            <Card modern className="group hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/30 border-orange-200 dark:border-orange-800 shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-orange-800">System Uptime</CardTitle>
-                <div className="p-2 bg-orange-200 rounded-lg group-hover:bg-orange-300 transition-colors duration-300">
-                  <Shield className="h-4 w-4 text-orange-600" />
+                <CardTitle className="text-sm font-medium text-orange-800 dark:text-orange-200">System Uptime</CardTitle>
+                <div className="p-2 bg-orange-200 dark:bg-orange-800 rounded-lg group-hover:bg-orange-300 dark:group-hover:bg-orange-700 transition-colors duration-300">
+                  <Shield className="h-4 w-4 text-orange-600 dark:text-orange-300" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-orange-900 mb-2 animate-slide-up" style={{ animationDelay: '300ms' }}>
+                <div className="text-2xl font-bold text-orange-900 dark:text-orange-100 mb-2 animate-slide-up" style={{ animationDelay: '300ms' }}>
                   {stats.systemUptime.toFixed(1)}%
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center text-xs text-green-600">
+                  <div className="flex items-center text-xs text-green-600 dark:text-green-400">
                     <CheckCircle className="w-3 h-3 mr-1" />
                     Target: 99.9%
                   </div>
@@ -211,16 +211,16 @@ export default function AdminDashboard() {
               <Card modern className="group hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden">
                 <CardContent className="p-6">
                   <Link href="/activity" className="block">
-                    <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-green-100 group-hover:scale-110">
-                      <Activity className="w-6 h-6 text-green-600" />
+                    <div className="w-12 h-12 bg-green-50 dark:bg-green-950/50 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-green-100 dark:group-hover:bg-green-900/50 group-hover:scale-110">
+                      <Activity className="w-6 h-6 text-green-600 dark:text-green-400" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2 group-hover:text-green-600 transition-colors">
+                    <h3 className="font-semibold text-foreground mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
                       Activity Monitor
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Monitor real-time system activity and events
                     </p>
-                    <div className="text-sm font-medium text-green-600 group-hover:text-green-700 transition-colors flex items-center">
+                    <div className="text-sm font-medium text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors flex items-center">
                       View Activity →
                     </div>
                   </Link>
@@ -230,16 +230,16 @@ export default function AdminDashboard() {
               <Card modern className="group hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden">
                 <CardContent className="p-6">
                   <Link href="/system-health" className="block">
-                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-blue-100 group-hover:scale-110">
-                      <Shield className="w-6 h-6 text-blue-600" />
+                    <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/50 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 group-hover:scale-110">
+                      <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2 group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-semibold text-foreground mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       System Health
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Check service status and infrastructure metrics
                     </p>
-                    <div className="text-sm font-medium text-blue-600 group-hover:text-blue-700 transition-colors flex items-center">
+                    <div className="text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors flex items-center">
                       View Health →
                     </div>
                   </Link>
@@ -311,7 +311,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className={`text-xs px-2 py-1 rounded-full ${
-                        system.status === 'operational' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        system.status === 'operational' ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200'
                       }`}>
                         {system.status}
                       </div>

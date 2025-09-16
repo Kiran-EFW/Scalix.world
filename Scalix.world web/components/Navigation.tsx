@@ -8,6 +8,7 @@ import { ProModeSelector } from './pro/ProModeSelector'
 import { UserMenu } from './auth/UserMenu'
 import { useAuth } from '@/hooks/useAuth'
 import { motion } from 'framer-motion'
+import { LogoWeb } from './ui/logo'
 
 export function Navigation() {
   const [isSignInOpen, setIsSignInOpen] = useState(false)
@@ -26,13 +27,8 @@ export function Navigation() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <img
-                src="/scalix-logo.svg"
-                alt="Scalix Logo"
-                className="h-8 w-8"
-              />
-              <span className="text-xl font-bold text-gray-900">Scalix</span>
+            <Link href="/" className="flex items-center">
+              <LogoWeb size="md" />
             </Link>
 
             {/* Navigation Links */}

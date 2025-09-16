@@ -1,0 +1,176 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Helper function to check if user is internal admin
+    function isInternalAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'internal-admin';
+    }
+
+    // ==========================================
+    // USER PROFILES
+    // ==========================================
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if isOwner(userId);
+
+      // Admins can read all user profiles
+      allow read: if isAdmin() || isInternalAdmin();
+
+      // Internal admins can update user profiles for management
+      allow update: if isInternalAdmin();
+    }
+
+    // ==========================================
+    // TEAM MANAGEMENT (Internal Admin Only)
+    // ==========================================
+    match /teamMembers/{memberId} {
+      // Only internal admins can manage team members
+      allow read, write: if isInternalAdmin();
+    }
+
+    match /roles/{roleId} {
+      // Only internal admins can manage roles
+      allow read, write: if isInternalAdmin();
+    }
+
+    match /invitations/{invitationId} {
+      // Only internal admins can manage invitations
+      allow read, write: if isInternalAdmin();
+    }
+
+    // ==========================================
+    // ENTERPRISE CUSTOMERS
+    // ==========================================
+    match /enterprise/{customerId} {
+      // Internal admins can fully manage enterprise customers
+      allow read, write: if isInternalAdmin();
+
+      // Sales team can read enterprise data
+      allow read: if isAuthenticated() &&
+                  exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'sales';
+    }
+
+    // ==========================================
+    // API KEYS MANAGEMENT
+    // ==========================================
+    match /apiKeys/{keyId} {
+      // Users can read their own API keys
+      allow read: if isAuthenticated() &&
+                  resource.data.userId == request.auth.uid;
+
+      // Users can create their own API keys
+      allow create: if isAuthenticated() &&
+                    request.resource.data.userId == request.auth.uid;
+
+      // Users can update/delete their own API keys
+      allow update, delete: if isAuthenticated() &&
+                            resource.data.userId == request.auth.uid &&
+                            request.auth.uid == resource.data.userId;
+
+      // Internal admins can manage all API keys
+      allow read, write: if isInternalAdmin();
+    }
+
+    // ==========================================
+    // BILLING & PAYMENTS
+    // ==========================================
+    match /invoices/{invoiceId} {
+      // Users can read their own invoices
+      allow read: if isAuthenticated() &&
+                  resource.data.userId == request.auth.uid;
+
+      // Internal admins and billing team can manage all invoices
+      allow read, write: if isInternalAdmin() ||
+                         (isAuthenticated() &&
+                          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'billing');
+    }
+
+    match /payments/{paymentId} {
+      // Users can read their own payments
+      allow read: if isAuthenticated() &&
+                  resource.data.userId == request.auth.uid;
+
+      // Internal admins and billing team can manage all payments
+      allow read, write: if isInternalAdmin() ||
+                         (isAuthenticated() &&
+                          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'billing');
+    }
+
+    // ==========================================
+    // SUPPORT TICKETS
+    // ==========================================
+    match /support/{ticketId} {
+      // Users can read/write their own support tickets
+      allow read, write: if isAuthenticated() &&
+                         resource.data.userId == request.auth.uid;
+
+      // Support team can manage all tickets
+      allow read, write: if isAuthenticated() &&
+                         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'support' ||
+                          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+                          isInternalAdmin());
+    }
+
+    // ==========================================
+    // SYSTEM METRICS & ANALYTICS
+    // ==========================================
+    match /metrics/{metricId} {
+      // Only internal admins can access system metrics
+      allow read, write: if isInternalAdmin();
+    }
+
+    match /activities/{activityId} {
+      // Only internal admins can access activity logs
+      allow read, write: if isInternalAdmin();
+    }
+
+    // ==========================================
+    // SETTINGS & CONFIGURATION
+    // ==========================================
+    match /settings/{settingId} {
+      // Only internal admins can manage system settings
+      allow read, write: if isInternalAdmin();
+    }
+
+    // ==========================================
+    // PUBLIC DATA (Read-only for all authenticated users)
+    // ==========================================
+    match /public/{document} {
+      allow read: if isAuthenticated();
+    }
+
+    // ==========================================
+    // AUDIT LOGS
+    // ==========================================
+    match /audit/{logId} {
+      // Only internal admins can read audit logs
+      allow read: if isInternalAdmin();
+
+      // System can write audit logs
+      allow write: if true; // Allow system writes for audit logging
+    }
+  }
+}

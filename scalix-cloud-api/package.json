@@ -10,7 +10,9 @@
     "init-db": "node scripts/init-db.js",
     "test": "node test-api.js",
     "test:local": "API_BASE=http://localhost:8080 node test-api.js",
-    "test:dev": "API_BASE=http://localhost:3000 node test-api.js"
+    "test:dev": "API_BASE=http://localhost:3000 node test-api.js",
+    "test:firebase": "node test-firebase-emulator.js",
+    "emulator": "firebase emulators:start --import=./firebase-data --export-on-exit=./firebase-data"
   },
   "keywords": [
     "scalix",
@@ -30,6 +32,7 @@
     "express-rate-limit": "^8.1.0",
     "firebase-admin": "^13.5.0",
     "helmet": "^8.1.0",
+    "playwright": "^1.55.0",
     "rate-limiter-flexible": "^7.3.0",
     "stripe": "^14.17.0",
     "tailwind-merge": "^3.3.1"

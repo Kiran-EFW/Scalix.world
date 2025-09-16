@@ -24,7 +24,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-background text-foreground">
         {/* Security Warning Banner */}
-        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-1 text-center text-sm font-medium shadow-lg border-b border-red-800">
+        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-0.5 text-center text-sm font-medium shadow-lg border-b border-red-800">
           <div className="flex items-center justify-center space-x-2">
             <span className="font-bold animate-pulse">🔒</span>
             <span>INTERNAL SYSTEM - AUTHORIZED PERSONNEL ONLY</span>
