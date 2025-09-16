@@ -40,8 +40,8 @@ import {
 
 const aiModels = [
   {
-    id: 'gpt-4',
-    name: 'GPT-4',
+    id: 'scalix-advanced',
+    name: 'Scalix Advanced',
     description: 'Most capable model for complex tasks',
     icon: Brain,
     maxTokens: 8192,
@@ -50,8 +50,8 @@ const aiModels = [
     proFeature: true
   },
   {
-    id: 'claude-3',
-    name: 'Claude 3',
+    id: 'scalix-analyst',
+    name: 'Scalix Analyst',
     description: 'Excellent for analysis and writing',
     icon: Sparkles,
     maxTokens: 4096,
@@ -60,8 +60,8 @@ const aiModels = [
     proFeature: true
   },
   {
-    id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5 Turbo',
+    id: 'scalix-standard',
+    name: 'Scalix Standard',
     description: 'Fast and efficient for general tasks',
     icon: Zap,
     maxTokens: 4096,
@@ -70,8 +70,8 @@ const aiModels = [
     proFeature: false
   },
   {
-    id: 'codellama',
-    name: 'Code Llama',
+    id: 'scalix-coder',
+    name: 'Scalix Coder',
     description: 'Specialized for code generation',
     icon: Code,
     maxTokens: 4096,
@@ -89,10 +89,10 @@ const welcomeMessages = {
     "Greetings! I'm your intelligent companion. What would you like to work on?"
   ],
   pro: [
-    "Welcome to Scalix Chat Pro! I'm your premium AI assistant with access to GPT-4 and Claude 3. How can I assist you today?",
-    "Hello Pro user! I'm powered by the most advanced AI models. What complex task can I help you with?",
-    "Greetings! As a Pro subscriber, you have access to our most capable AI models. Ready to tackle something challenging?",
-    "Welcome back! Your Pro AI assistant is here with GPT-4, Claude 3, and unlimited creative potential. What shall we create?"
+    "Welcome to Scalix Chat Pro! I'm your premium AI assistant with access to Scalix Advanced and Scalix Analyst. How can I assist you today?",
+    "Hello Pro user! I'm powered by the most advanced Scalix AI models. What complex task can I help you with?",
+    "Greetings! As a Pro subscriber, you have access to our most capable Scalix AI models. Ready to tackle something challenging?",
+    "Welcome back! Your Pro AI assistant is here with Scalix Advanced, Scalix Analyst, and unlimited creative potential. What shall we create?"
   ]
 }
 

@@ -24,10 +24,27 @@ const ENABLE_ACCESS_CONTROL = process.env.ENABLE_ACCESS_CONTROL !== 'false'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip middleware for static files and API routes that don't need auth
+  // Handle CORS for API routes
+  if (pathname.startsWith('/api/')) {
+    const response = NextResponse.next()
+    
+    // Add CORS headers
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.set('Access-Control-Max-Age', '86400')
+    
+    // Handle preflight requests
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 200, headers: response.headers })
+    }
+    
+    return response
+  }
+
+  // Skip middleware for static files and other routes
   if (
     pathname.startsWith('/_next/') ||
-    pathname.startsWith('/api/') ||
     pathname.includes('.') ||
     publicRoutes.some(route => pathname.startsWith(route))
   ) {

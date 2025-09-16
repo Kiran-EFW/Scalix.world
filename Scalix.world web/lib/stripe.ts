@@ -5,9 +5,12 @@ import { NextRequest, NextResponse } from 'next/server'
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 
-// Initialize Stripe only if secret key is available
+// Initialize Stripe only if secret key is available and not a mock key
 let stripe: Stripe | null = null
-if (stripeSecretKey && stripeSecretKey !== 'sk_test_...' && !stripeSecretKey.includes('...')) {
+if (stripeSecretKey && 
+    stripeSecretKey !== 'sk_test_...' && 
+    !stripeSecretKey.includes('...') &&
+    !stripeSecretKey.includes('development_mock_key')) {
   stripe = new Stripe(stripeSecretKey, {
     apiVersion: '2025-08-27.basil' as any,
     typescript: true,

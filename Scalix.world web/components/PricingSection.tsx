@@ -13,7 +13,7 @@ const plans = [
     description: 'Perfect for individual developers',
     features: [
       'Up to 5,000 API calls/month',
-      '3 AI providers (OpenAI, Anthropic, Google)',
+      'Scalix Local AI models',
       'Real-time usage monitoring',
       'Basic load balancing',
       'Email support',
@@ -29,7 +29,7 @@ const plans = [
     description: 'For growing applications',
     features: [
       'Up to 50,000 API calls/month',
-      'All AI providers + custom models',
+      'Scalix Advanced AI models + custom models',
       'Advanced analytics dashboard',
       'Intelligent load balancing',
       'Priority support',
@@ -46,7 +46,7 @@ const plans = [
     description: 'For large-scale applications',
     features: [
       'Unlimited API calls',
-      'All AI providers + enterprise models',
+      'Scalix Enterprise AI models + custom models',
       'Custom analytics & reporting',
       'Advanced load balancing',
       'Dedicated support manager',

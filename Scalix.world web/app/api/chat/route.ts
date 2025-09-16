@@ -42,7 +42,7 @@ function generateMockResponse(message: string, model: string): string {
   const lowerMessage = message.toLowerCase()
 
   // Model-specific responses
-  if (model === 'codellama') {
+  if (model === 'scalix-coder') {
     if (lowerMessage.includes('code') || lowerMessage.includes('function') || lowerMessage.includes('script')) {
       return `Here's a code example based on your request:
 
@@ -75,10 +75,10 @@ This code demonstrates input validation, processing, and structured output. Woul
     }
   }
 
-  if (model === 'claude-3') {
+  if (model === 'scalix-analyst') {
     return `I understand you're asking about "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}".
 
-As Claude, I can help you with:
+As Scalix Analyst, I can help you with:
 • Analytical thinking and reasoning
 • Creative writing and content generation
 • Complex problem-solving
@@ -88,10 +88,10 @@ As Claude, I can help you with:
 Could you provide more context about what you'd like help with? I'm here to assist with your specific needs and can adapt my responses based on your requirements.`
   }
 
-  if (model === 'gpt-4') {
+  if (model === 'scalix-advanced') {
     return `Thank you for your message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"
 
-As GPT-4, I'm designed to provide comprehensive assistance across a wide range of topics. I can help you with:
+As Scalix Advanced, I'm designed to provide comprehensive assistance across a wide range of topics. I can help you with:
 
 🚀 **Problem Solving**: Break down complex issues into manageable steps
 📝 **Content Creation**: Generate ideas, write articles, or create content
@@ -102,7 +102,7 @@ As GPT-4, I'm designed to provide comprehensive assistance across a wide range o
 What specific area would you like to explore or what problem can I help you solve today?`
   }
 
-  // Default response for GPT-3.5-turbo
+  // Default response for Scalix Standard
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
     return `Hello! I'm ${model} running on Scalix, your local AI platform. I'm here to help you with any questions or tasks you have.
 

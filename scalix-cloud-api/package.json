@@ -11,8 +11,8 @@
     "test": "node test-api.js",
     "test:local": "API_BASE=http://localhost:8080 node test-api.js",
     "test:dev": "API_BASE=http://localhost:3000 node test-api.js",
-    "test:firebase": "node test-firebase-emulator.js",
-    "emulator": "firebase emulators:start --import=./firebase-data --export-on-exit=./firebase-data"
+    "build": "echo 'No build step required for API server'",
+    "deploy": "gcloud run deploy scalix-api --source . --platform managed --allow-unauthenticated"
   },
   "keywords": [
     "scalix",

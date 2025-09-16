@@ -159,9 +159,10 @@ export function ApiKeysManager() {
     })
   }
 
-  const formatDate = (date: Date | null) => {
+  const formatDate = (date: Date | string | null) => {
     if (!date) return 'Never'
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    return dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
   const maskApiKey = (key: string) => {
@@ -393,7 +394,7 @@ export function ApiKeysManager() {
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-4",
+    "model": "scalix-advanced",
     "messages": [{"role": "user", "content": "Hello!"}]
   }'`}
             </pre>
@@ -411,7 +412,7 @@ response = requests.post(
         'Content-Type': 'application/json'
     },
     json={
-        'model': 'gpt-4',
+        'model': 'scalix-advanced',
         'messages': [{'role': 'user', 'content': 'Hello!'}]
     }
 )`}

@@ -78,7 +78,7 @@ const response = await fetch('https://api.scalix.world/v1/chat/completions', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    model: 'gpt-4',
+    model: 'scalix-advanced',
     messages: [{ role: 'user', content: 'Hello!' }]
   })
 });`,
@@ -118,7 +118,7 @@ const response = await fetch('https://api.scalix.world/v1/chat/completions', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    model: 'gpt-4',
+    model: 'scalix-advanced',
     messages: [{ role: 'user', content: 'Write a function' }],
     stream: true
   })

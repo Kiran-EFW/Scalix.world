@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { motion } from 'framer-motion'
 import {
@@ -16,7 +16,8 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react'
 
 interface Project {
@@ -31,13 +32,14 @@ interface Project {
   cost: number
 }
 
-const mockProjects: Project[] = [
+// Initial mock data for development
+const initialProjects: Project[] = [
   {
     id: '1',
     name: 'Customer Support Chatbot',
     description: 'AI-powered customer support system for handling common inquiries',
     status: 'running',
-    model: 'GPT-4',
+    model: 'Scalix Advanced',
     createdAt: '2025-09-01',
     lastDeployed: '2025-09-10',
     requests: 15420,
@@ -48,7 +50,7 @@ const mockProjects: Project[] = [
     name: 'Code Review Assistant',
     description: 'Automated code review and suggestions for developers',
     status: 'running',
-    model: 'Claude 3 Opus',
+    model: 'Scalix Analyst',
     createdAt: '2025-08-15',
     lastDeployed: '2025-09-08',
     requests: 8920,
@@ -59,7 +61,7 @@ const mockProjects: Project[] = [
     name: 'Content Generator',
     description: 'AI content creation tool for marketing and blogging',
     status: 'stopped',
-    model: 'Gemini Pro',
+    model: 'Scalix Standard',
     createdAt: '2025-07-20',
     lastDeployed: '2025-09-05',
     requests: 5430,
@@ -89,10 +91,133 @@ const statusConfig = {
 }
 
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [loading, setLoading] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+  const [newProjectModel, setNewProjectModel] = useState('Scalix Standard')
+  const [creating, setCreating] = useState(false)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  const filteredProjects = mockProjects.filter(project => {
+  // Load projects on component mount
+  useEffect(() => {
+    loadProjects()
+  }, [])
+
+  const loadProjects = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/projects')
+      const data = await response.json()
+      if (data.success) {
+        setProjects(data.data)
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createProject = async () => {
+    if (!newProjectName.trim()) return
+
+    setCreating(true)
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: newProjectName.trim(),
+          description: newProjectDescription.trim(),
+          model: newProjectModel
+        })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setProjects(prev => [data.data, ...prev])
+        setShowCreateModal(false)
+        setNewProjectName('')
+        setNewProjectDescription('')
+        setNewProjectModel('Scalix Standard')
+        // Show success message
+        alert('Project created successfully!')
+      } else {
+        alert('Failed to create project: ' + data.error)
+      }
+    } catch (error) {
+      console.error('Error creating project:', error)
+      alert('Failed to create project')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const updateProjectStatus = async (projectId: string, newStatus: 'running' | 'stopped') => {
+    setActionLoading(projectId)
+    try {
+      const response = await fetch(`/api/projects?id=${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setProjects(prev => prev.map(p => p.id === projectId ? data.data : p))
+        alert(`Project ${newStatus === 'running' ? 'started' : 'stopped'} successfully!`)
+      } else {
+        alert('Failed to update project: ' + data.error)
+      }
+    } catch (error) {
+      console.error('Error updating project:', error)
+      alert('Failed to update project')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const deleteProject = async (projectId: string) => {
+    if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      return
+    }
+
+    setActionLoading(projectId)
+    try {
+      const response = await fetch(`/api/projects?id=${projectId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setProjects(prev => prev.filter(p => p.id !== projectId))
+        alert('Project deleted successfully!')
+      } else {
+        alert('Failed to delete project: ' + data.error)
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      alert('Failed to delete project')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const viewProject = (projectId: string) => {
+    // For now, just show an alert. In a real app, this would navigate to project details
+    const project = projects.find(p => p.id === projectId)
+    alert(`Viewing project: ${project?.name}\n\nDescription: ${project?.description}\nStatus: ${project?.status}\nModel: ${project?.model}`)
+  }
+
+  const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filterStatus === 'all' || project.status === filterStatus
@@ -111,7 +236,10 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
           <p className="text-gray-600 mt-2">Manage and monitor your AI applications</p>
         </div>
-        <Button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
+        >
           <Plus className="w-4 h-4 mr-2" />
           New Project
         </Button>
@@ -131,7 +259,7 @@ export default function ProjectsPage() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Projects</p>
-              <p className="text-2xl font-bold text-gray-900">{mockProjects.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
             </div>
           </div>
         </div>
@@ -144,7 +272,7 @@ export default function ProjectsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Running</p>
               <p className="text-2xl font-bold text-gray-900">
-                {mockProjects.filter(p => p.status === 'running').length}
+                {projects.filter(p => p.status === 'running').length}
               </p>
             </div>
           </div>
@@ -158,7 +286,7 @@ export default function ProjectsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Requests</p>
               <p className="text-2xl font-bold text-gray-900">
-                {mockProjects.reduce((sum, p) => sum + p.requests, 0).toLocaleString()}
+                {projects.reduce((sum, p) => sum + p.requests, 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -172,7 +300,7 @@ export default function ProjectsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Cost</p>
               <p className="text-2xl font-bold text-gray-900">
-                ${mockProjects.reduce((sum, p) => sum + p.cost, 0).toFixed(2)}
+                ${projects.reduce((sum, p) => sum + p.cost, 0).toFixed(2)}
               </p>
             </div>
           </div>
@@ -266,6 +394,7 @@ export default function ProjectsPage() {
                   size="sm"
                   variant="outline"
                   className="flex-1"
+                  onClick={() => viewProject(project.id)}
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   View
@@ -276,8 +405,14 @@ export default function ProjectsPage() {
                     size="sm"
                     variant="outline"
                     className="text-orange-600 hover:text-orange-700"
+                    onClick={() => updateProjectStatus(project.id, 'stopped')}
+                    disabled={actionLoading === project.id}
                   >
-                    <Pause className="w-4 h-4 mr-2" />
+                    {actionLoading === project.id ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Pause className="w-4 h-4 mr-2" />
+                    )}
                     Stop
                   </Button>
                 ) : (
@@ -285,8 +420,14 @@ export default function ProjectsPage() {
                     size="sm"
                     variant="outline"
                     className="text-green-600 hover:text-green-700"
+                    onClick={() => updateProjectStatus(project.id, 'running')}
+                    disabled={actionLoading === project.id}
                   >
-                    <Play className="w-4 h-4 mr-2" />
+                    {actionLoading === project.id ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Play className="w-4 h-4 mr-2" />
+                    )}
                     Start
                   </Button>
                 )}
@@ -294,8 +435,15 @@ export default function ProjectsPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => deleteProject(project.id)}
+                  disabled={actionLoading === project.id}
+                  className="text-red-600 hover:text-red-700"
                 >
-                  <Edit className="w-4 h-4" />
+                  {actionLoading === project.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
             </motion.div>
@@ -314,11 +462,90 @@ export default function ProjectsPage() {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
           <p className="text-gray-600 mb-6">Try adjusting your search or filter criteria</p>
-          <Button>
+          <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Your First Project
           </Button>
         </motion.div>
+      )}
+
+      {/* Create Project Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New Project</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Project Name
+                </label>
+                <input
+                  type="text"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  placeholder="Enter project name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                  placeholder="Enter project description"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  AI Model
+                </label>
+                <select
+                  value={newProjectModel}
+                  onChange={(e) => setNewProjectModel(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Scalix Standard">Scalix Standard</option>
+                  <option value="Scalix Advanced">Scalix Advanced</option>
+                  <option value="Scalix Analyst">Scalix Analyst</option>
+                  <option value="Scalix Coder">Scalix Coder</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 mt-6">
+              <Button
+                onClick={createProject}
+                disabled={creating || !newProjectName.trim()}
+                className="flex items-center bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {creating ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4 mr-2" />
+                )}
+                {creating ? 'Creating...' : 'Create Project'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCreateModal(false)
+                  setNewProjectName('')
+                  setNewProjectDescription('')
+                  setNewProjectModel('Scalix Standard')
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

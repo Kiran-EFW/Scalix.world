@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { motion } from 'framer-motion'
 import {
@@ -15,13 +15,297 @@ import {
   EyeOff,
   Upload,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Loader2,
+  Check
 } from 'lucide-react'
+
+interface UserData {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  company: string
+  bio: string
+  profilePicture: string | null
+  twoFactorEnabled: boolean
+  activeSessions: Array<{
+    id: string
+    name: string
+    device: string
+    lastActive: string
+    isCurrent: boolean
+  }>
+  notificationSettings: {
+    email: boolean
+    projectUpdates: boolean
+    teamActivity: boolean
+    billingAlerts: boolean
+  }
+  appearanceSettings: {
+    theme: string
+    language: string
+    timezone: string
+  }
+}
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'api' | 'appearance'>('profile')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  
+  // Form states
+  const [profileData, setProfileData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    company: '',
+    bio: ''
+  })
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [notificationData, setNotificationData] = useState({
+    email: true,
+    projectUpdates: true,
+    teamActivity: false,
+    billingAlerts: true
+  })
+  const [appearanceData, setAppearanceData] = useState({
+    theme: 'light',
+    language: 'en-US',
+    timezone: 'UTC-8'
+  })
+
+  useEffect(() => {
+    loadUserData()
+  }, [])
+
+  const loadUserData = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/settings')
+      const result = await response.json()
+      if (result.success) {
+        setUserData(result.data)
+        setProfileData({
+          firstName: result.data.firstName,
+          lastName: result.data.lastName,
+          email: result.data.email,
+          company: result.data.company,
+          bio: result.data.bio
+        })
+        setNotificationData(result.data.notificationSettings)
+        setAppearanceData(result.data.appearanceSettings)
+      } else {
+        setErrorMessage('Failed to load user data')
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error)
+      setErrorMessage('Failed to load user data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message)
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
+
+  const showError = (message: string) => {
+    setErrorMessage(message)
+    setTimeout(() => setErrorMessage(''), 5000)
+  }
+
+  const saveProfile = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings?action=profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData)
+      })
+      const result = await response.json()
+      if (result.success) {
+        setUserData(result.data)
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      showError('Failed to save profile')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updatePassword = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings?action=password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(passwordData)
+      })
+      const result = await response.json()
+      if (result.success) {
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error updating password:', error)
+      showError('Failed to update password')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const toggle2FA = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings?action=2fa', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !userData?.twoFactorEnabled })
+      })
+      const result = await response.json()
+      if (result.success) {
+        setUserData(result.data)
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error toggling 2FA:', error)
+      showError('Failed to update 2FA settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const revokeSession = async (sessionId: string) => {
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/settings?action=session&sessionId=${sessionId}`, {
+        method: 'DELETE'
+      })
+      const result = await response.json()
+      if (result.success) {
+        setUserData(prev => prev ? {
+          ...prev,
+          activeSessions: prev.activeSessions.filter(s => s.id !== sessionId)
+        } : null)
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error revoking session:', error)
+      showError('Failed to revoke session')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updateNotifications = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings?action=notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notificationData)
+      })
+      const result = await response.json()
+      if (result.success) {
+        setUserData(result.data)
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error updating notifications:', error)
+      showError('Failed to update notification settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updateAppearance = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings?action=appearance', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(appearanceData)
+      })
+      const result = await response.json()
+      if (result.success) {
+        setUserData(result.data)
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error updating appearance:', error)
+      showError('Failed to update appearance settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const deleteAccount = async () => {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return
+    }
+    
+    setSaving(true)
+    try {
+      const response = await fetch('/api/settings?action=account', {
+        method: 'DELETE'
+      })
+      const result = await response.json()
+      if (result.success) {
+        showSuccess(result.message)
+      } else {
+        showError(result.error)
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      showError('Failed to delete account')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveChanges = () => {
+    switch (activeTab) {
+      case 'profile':
+        saveProfile()
+        break
+      case 'security':
+        updatePassword()
+        break
+      case 'notifications':
+        updateNotifications()
+        break
+      case 'appearance':
+        updateAppearance()
+        break
+      default:
+        showError('No changes to save')
+    }
+  }
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -43,11 +327,42 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
           <p className="text-gray-600 mt-2">Manage your account settings and preferences</p>
         </div>
-        <Button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white">
-          <Save className="w-4 h-4 mr-2" />
-          Save Changes
+        <Button 
+          onClick={handleSaveChanges}
+          disabled={saving}
+          className="flex items-center bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+        >
+          {saving ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4 mr-2" />
+          )}
+          {saving ? 'Saving...' : 'Save Changes'}
         </Button>
       </motion.div>
+
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center"
+        >
+          <Check className="w-5 h-5 text-green-600 mr-3" />
+          <span className="text-green-800">{successMessage}</span>
+        </motion.div>
+      )}
+
+      {errorMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center"
+        >
+          <AlertTriangle className="w-5 h-5 text-red-600 mr-3" />
+          <span className="text-red-800">{errorMessage}</span>
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar Navigation */}
@@ -100,7 +415,14 @@ export default function SettingsPage() {
                     <User className="w-10 h-10 text-gray-400" />
                   </div>
                   <div>
-                    <Button variant="outline" className="mb-2">
+                    <Button 
+                      variant="outline" 
+                      className="mb-2"
+                      onClick={() => {
+                        // In production, this would open a file picker
+                        showSuccess('Photo upload functionality coming soon!')
+                      }}
+                    >
                       <Upload className="w-4 h-4 mr-2" />
                       Change Photo
                     </Button>
@@ -116,7 +438,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="text"
-                      defaultValue="Scalix"
+                      value={profileData.firstName}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -127,7 +450,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="text"
-                      defaultValue="Admin"
+                      value={profileData.lastName}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -138,7 +462,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="email"
-                      defaultValue="admin@scalix.world"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -149,7 +474,8 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="text"
-                      defaultValue="Scalix Inc."
+                      value={profileData.company}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, company: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -160,7 +486,8 @@ export default function SettingsPage() {
                     </label>
                     <textarea
                       rows={4}
-                      defaultValue="Building the future of AI-powered applications with Scalix."
+                      value={profileData.bio}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
@@ -188,6 +515,8 @@ export default function SettingsPage() {
                       <div className="relative">
                         <input
                           type={showPassword ? 'text' : 'password'}
+                          value={passwordData.currentPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <button
@@ -211,6 +540,8 @@ export default function SettingsPage() {
                       <div className="relative">
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
+                          value={passwordData.newPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <button
@@ -233,6 +564,8 @@ export default function SettingsPage() {
                       </label>
                       <input
                         type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -249,13 +582,22 @@ export default function SettingsPage() {
                       <p className="text-gray-600 mt-1">Add an extra layer of security to your account</p>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                      <span className="text-sm text-gray-600">Disabled</span>
+                      <div className={`w-3 h-3 rounded-full mr-2 ${userData?.twoFactorEnabled ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <span className="text-sm text-gray-600">{userData?.twoFactorEnabled ? 'Enabled' : 'Disabled'}</span>
                     </div>
                   </div>
 
                   <div className="mt-4">
-                    <Button variant="outline">Enable 2FA</Button>
+                    <Button 
+                      variant="outline"
+                      onClick={toggle2FA}
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : null}
+                      {userData?.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                    </Button>
                   </div>
                 </div>
 
@@ -264,21 +606,30 @@ export default function SettingsPage() {
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Active Sessions</h3>
 
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-900">Current Session</p>
-                        <p className="text-sm text-gray-600">Chrome on Windows • Active now</p>
+                    {userData?.activeSessions.map((session) => (
+                      <div key={session.id} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
+                        <div>
+                          <p className="font-medium text-gray-900">{session.name}</p>
+                          <p className="text-sm text-gray-600">{session.device} • {session.lastActive}</p>
+                        </div>
+                        {session.isCurrent ? (
+                          <span className="text-green-600 text-sm font-medium">Current</span>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => revokeSession(session.id)}
+                            disabled={saving}
+                          >
+                            {saving ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              'Revoke'
+                            )}
+                          </Button>
+                        )}
                       </div>
-                      <span className="text-green-600 text-sm font-medium">Current</span>
-                    </div>
-
-                    <div className="flex items-center justify-between py-3">
-                      <div>
-                        <p className="font-medium text-gray-900">Mobile App</p>
-                        <p className="text-sm text-gray-600">iOS App • 2 hours ago</p>
-                      </div>
-                      <Button variant="outline" size="sm">Revoke</Button>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -299,7 +650,12 @@ export default function SettingsPage() {
                       <p className="text-gray-600">Receive notifications via email</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationData.email}
+                        onChange={(e) => setNotificationData(prev => ({ ...prev, email: e.target.checked }))}
+                      />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -310,7 +666,12 @@ export default function SettingsPage() {
                       <p className="text-gray-600">Get notified when your projects are updated</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationData.projectUpdates}
+                        onChange={(e) => setNotificationData(prev => ({ ...prev, projectUpdates: e.target.checked }))}
+                      />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -321,7 +682,12 @@ export default function SettingsPage() {
                       <p className="text-gray-600">Notifications about team member activities</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" />
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationData.teamActivity}
+                        onChange={(e) => setNotificationData(prev => ({ ...prev, teamActivity: e.target.checked }))}
+                      />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -332,7 +698,12 @@ export default function SettingsPage() {
                       <p className="text-gray-600">Important billing and payment notifications</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={notificationData.billingAlerts}
+                        onChange={(e) => setNotificationData(prev => ({ ...prev, billingAlerts: e.target.checked }))}
+                      />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -424,22 +795,30 @@ export default function SettingsPage() {
 
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Language</h3>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option>English (US)</option>
-                      <option>English (UK)</option>
-                      <option>Spanish</option>
-                      <option>French</option>
-                      <option>German</option>
+                    <select 
+                      value={appearanceData.language}
+                      onChange={(e) => setAppearanceData(prev => ({ ...prev, language: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="en-US">English (US)</option>
+                      <option value="en-UK">English (UK)</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
                     </select>
                   </div>
 
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Timezone</h3>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                      <option>UTC-8 (Pacific Time)</option>
-                      <option>UTC-5 (Eastern Time)</option>
-                      <option>UTC+0 (GMT)</option>
-                      <option>UTC+1 (Central European Time)</option>
+                    <select 
+                      value={appearanceData.timezone}
+                      onChange={(e) => setAppearanceData(prev => ({ ...prev, timezone: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="UTC-8">UTC-8 (Pacific Time)</option>
+                      <option value="UTC-5">UTC-5 (Eastern Time)</option>
+                      <option value="UTC+0">UTC+0 (GMT)</option>
+                      <option value="UTC+1">UTC+1 (Central European Time)</option>
                     </select>
                   </div>
                 </div>
@@ -469,8 +848,18 @@ export default function SettingsPage() {
                 Permanently delete your account and all associated data. This action cannot be undone.
               </p>
             </div>
-            <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-50">
-              Delete Account
+            <Button 
+              variant="outline" 
+              className="border-red-300 text-red-700 hover:bg-red-50"
+              onClick={deleteAccount}
+              disabled={saving}
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4 mr-2" />
+              )}
+              {saving ? 'Deleting...' : 'Delete Account'}
             </Button>
           </div>
         </div>

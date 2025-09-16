@@ -17,7 +17,7 @@ const plans = [
     description: 'Perfect for getting started with AI development',
     features: [
       'Up to 100 AI tokens/month',
-      'Basic AI models (GPT-3.5, Claude Instant)',
+      'Scalix Local AI models',
       'Local processing only',
       'Community support',
       '1 active project',
@@ -38,7 +38,7 @@ const plans = [
     description: 'For serious developers building AI applications',
     features: [
       'Up to 10,000 AI tokens/month',
-      'Premium AI models (GPT-4, Claude 3, Gemini)',
+      'Scalix Advanced AI models',
       'Bring your own API keys',
       'Advanced local processing',
       'Priority email support',
@@ -95,7 +95,7 @@ const faqs = [
   },
   {
     question: 'Can I use my own AI API keys?',
-    answer: 'Yes! With Pro and Team plans, you can bring your own API keys for OpenAI, Anthropic, Google, and other AI providers. This gives you full control over costs and allows you to use your existing provider contracts.'
+    answer: 'Yes! With Pro and Team plans, you can bring your own API keys for external AI providers if needed. However, Scalix is designed to work primarily with local AI models for maximum privacy and control.'
   },
   {
     question: 'What\'s included in team collaboration?',

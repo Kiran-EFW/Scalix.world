@@ -24,7 +24,7 @@ const features = [
     title: 'Bring Your Own Keys',
     description: 'Use your own AI API keys. Full control over your data and costs.',
     details: [
-      'Connect to OpenAI, Anthropic, Google, or any AI provider',
+      'Connect to Scalix AI models or bring your own API keys',
       'Pay only for what you use directly to providers',
       'No hidden fees or markup on API costs',
       'Switch providers anytime without platform changes'
@@ -72,7 +72,7 @@ const features = [
     title: 'Advanced AI Integration',
     description: 'Latest AI models with advanced reasoning and code generation.',
     details: [
-      'Support for GPT-4, Claude, Gemini, and local models',
+      'Support for Scalix AI models and local models',
       'Advanced prompt engineering and context management',
       'Multi-modal AI capabilities (text, code, images)',
       'Custom model fine-tuning support'
