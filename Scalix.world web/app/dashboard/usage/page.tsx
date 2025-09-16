@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { motion } from 'framer-motion'
+import { useRealtimeUsageData } from '@/hooks/useRealtimeData'
+import { RealtimeStatusCompact } from '@/components/ui/RealtimeStatus'
 import {
   BarChart3,
   TrendingUp,
@@ -66,6 +68,15 @@ interface ErrorLog {
 }
 
 export default function UsagePage() {
+  // Real-time data hook
+  const { 
+    data: realtimeUsageData, 
+    loading: realtimeLoading, 
+    error: realtimeError,
+    lastUpdate,
+    refresh: refreshRealtime
+  } = useRealtimeUsageData('admin', true)
+  
   const [timeRange, setTimeRange] = useState('30d')
   const [selectedModel, setSelectedModel] = useState('all')
   const [selectedProject, setSelectedProject] = useState('all')
@@ -89,6 +100,22 @@ export default function UsagePage() {
   useEffect(() => {
     loadUsageData()
   }, [timeRange, selectedModel, selectedProject, startDate, endDate])
+
+  // Sync real-time data with local state
+  useEffect(() => {
+    if (realtimeUsageData && realtimeUsageData.length > 0) {
+      // Process real-time usage data and update local state
+      const latestData = realtimeUsageData[0] // Get the latest usage data
+      if (latestData) {
+        setSummary(latestData.summary || null)
+        setDailyUsage(latestData.dailyUsage || [])
+        setModelUsage(latestData.modelUsage || [])
+        setProjectUsage(latestData.projectUsage || [])
+        setHourlyUsage(latestData.hourlyUsage || [])
+        setErrorLogs(latestData.errorLogs || [])
+      }
+    }
+  }, [realtimeUsageData])
 
   const loadUsageData = async () => {
     setLoading(true)
@@ -218,8 +245,16 @@ export default function UsagePage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Usage Analytics</h1>
+          <div className="flex items-center space-x-3">
+            <h1 className="text-3xl font-bold text-gray-900">Usage Analytics</h1>
+            <RealtimeStatusCompact />
+          </div>
           <p className="text-gray-600 mt-2">Track your API usage, costs, and performance metrics</p>
+          {lastUpdate && (
+            <p className="text-xs text-gray-500 mt-1">
+              Last updated: {lastUpdate.toLocaleTimeString()}
+            </p>
+          )}
         </div>
         <div className="flex items-center space-x-3">
           <Button 

@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Mock usage data - in production, this would come from a database
+// Firestore integration with fallback to mock data
+let firestoreAvailable = false
+let db: any = null
+
+// Try to import and initialize Firestore
+try {
+  const { db: firestoreDb } = require('@/lib/firebase')
+  if (firestoreDb) {
+    db = firestoreDb
+    firestoreAvailable = true
+    console.log('✅ Usage Analytics: Firestore connected')
+  }
+} catch (error) {
+  console.log('⚠️ Usage Analytics: Using mock data fallback')
+}
+
+// Mock usage data - fallback when Firestore is not available
 let mockUsageData = {
   summary: {
     totalRequests: 125430,
@@ -76,6 +92,162 @@ let mockUsageData = {
   ]
 }
 
+// Firestore helper functions
+async function getUsageFromFirestore(userId: string, action: string, filters: any = {}) {
+  if (!firestoreAvailable || !db) {
+    return null
+  }
+
+  try {
+    const { 
+      collection, 
+      getDocs, 
+      query, 
+      where, 
+      orderBy, 
+      limit, 
+      startAt, 
+      endAt,
+      serverTimestamp 
+    } = await import('firebase/firestore')
+
+    const usageCollection = collection(db, 'usage_analytics')
+    
+    switch (action) {
+      case 'summary':
+        // Get summary data from Firestore
+        const summaryQuery = query(
+          usageCollection,
+          where('userId', '==', userId),
+          orderBy('timestamp', 'desc'),
+          limit(1)
+        )
+        const summarySnapshot = await getDocs(summaryQuery)
+        
+        if (!summarySnapshot.empty) {
+          const latestData = summarySnapshot.docs[0].data()
+          return {
+            totalRequests: latestData.totalRequests || 0,
+            totalCost: latestData.totalCost || 0,
+            totalTokens: latestData.totalTokens || 0,
+            averageResponseTime: latestData.averageResponseTime || 0,
+            successRate: latestData.successRate || 0,
+            period: filters.period ? `${filters.period} days` : '30 days'
+          }
+        }
+        return null
+
+      case 'daily':
+        // Get daily usage data
+        const dailyQuery = query(
+          usageCollection,
+          where('userId', '==', userId),
+          where('type', '==', 'daily'),
+          orderBy('date', 'desc'),
+          limit(30)
+        )
+        const dailySnapshot = await getDocs(dailyQuery)
+        
+        return dailySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+
+      case 'models':
+        // Get model usage data
+        const modelsQuery = query(
+          usageCollection,
+          where('userId', '==', userId),
+          where('type', '==', 'model'),
+          orderBy('requests', 'desc')
+        )
+        const modelsSnapshot = await getDocs(modelsQuery)
+        
+        return modelsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+
+      case 'projects':
+        // Get project usage data
+        const projectsQuery = query(
+          usageCollection,
+          where('userId', '==', userId),
+          where('type', '==', 'project'),
+          orderBy('requests', 'desc')
+        )
+        const projectsSnapshot = await getDocs(projectsQuery)
+        
+        return projectsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+
+      case 'hourly':
+        // Get hourly usage data
+        const hourlyQuery = query(
+          usageCollection,
+          where('userId', '==', userId),
+          where('type', '==', 'hourly'),
+          orderBy('hour', 'asc')
+        )
+        const hourlySnapshot = await getDocs(hourlyQuery)
+        
+        return hourlySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+
+      case 'errors':
+        // Get error logs
+        const errorsQuery = query(
+          usageCollection,
+          where('userId', '==', userId),
+          where('type', '==', 'error'),
+          orderBy('timestamp', 'desc'),
+          limit(50)
+        )
+        const errorsSnapshot = await getDocs(errorsQuery)
+        
+        return errorsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+
+      default:
+        return null
+    }
+  } catch (error) {
+    console.error('❌ Firestore usage query error:', error)
+    return null
+  }
+}
+
+async function saveUsageToFirestore(userId: string, usageData: any) {
+  if (!firestoreAvailable || !db) {
+    return false
+  }
+
+  try {
+    const { collection, addDoc, serverTimestamp } = await import('firebase/firestore')
+    
+    const usageCollection = collection(db, 'usage_analytics')
+    
+    const docData = {
+      ...usageData,
+      userId,
+      timestamp: serverTimestamp(),
+      createdAt: new Date().toISOString()
+    }
+    
+    await addDoc(usageCollection, docData)
+    return true
+  } catch (error) {
+    console.error('❌ Firestore usage save error:', error)
+    return false
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -89,78 +261,97 @@ export async function GET(request: NextRequest) {
     // In production, get user ID from authentication
     const userId = 'admin'
     
+    // Try to get data from Firestore first, fallback to mock data
+    const firestoreData = await getUsageFromFirestore(userId, action || 'all', {
+      period,
+      startDate,
+      endDate,
+      model,
+      projectId
+    })
+
     switch (action) {
       case 'summary':
+        const summaryData = firestoreData || {
+          ...mockUsageData.summary,
+          period: `${period} days`
+        }
         return NextResponse.json({ 
           success: true, 
-          data: {
-            ...mockUsageData.summary,
-            period: `${period} days`
-          }
+          data: summaryData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
         
       case 'daily':
-        let filteredDaily = mockUsageData.dailyUsage
+        let dailyData = firestoreData || mockUsageData.dailyUsage
         
-        // Apply date filters
-        if (startDate && endDate) {
-          filteredDaily = filteredDaily.filter(day => 
+        // Apply date filters if using mock data
+        if (!firestoreData && startDate && endDate) {
+          dailyData = dailyData.filter((day: any) => 
             day.date >= startDate && day.date <= endDate
           )
         }
         
         return NextResponse.json({ 
           success: true, 
-          data: filteredDaily 
+          data: dailyData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
         
       case 'models':
-        let filteredModels = mockUsageData.modelUsage
+        let modelsData = firestoreData || mockUsageData.modelUsage
         
-        // Apply model filter
-        if (model && model !== 'all') {
-          filteredModels = filteredModels.filter(m => m.model === model)
+        // Apply model filter if using mock data
+        if (!firestoreData && model && model !== 'all') {
+          modelsData = modelsData.filter((m: any) => m.model === model)
         }
         
         return NextResponse.json({ 
           success: true, 
-          data: filteredModels 
+          data: modelsData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
         
       case 'projects':
-        let filteredProjects = mockUsageData.projectUsage
+        let projectsData = firestoreData || mockUsageData.projectUsage
         
-        // Apply project filter
-        if (projectId && projectId !== 'all') {
-          filteredProjects = filteredProjects.filter(p => p.projectId === projectId)
+        // Apply project filter if using mock data
+        if (!firestoreData && projectId && projectId !== 'all') {
+          projectsData = projectsData.filter((p: any) => p.projectId === projectId)
         }
         
         return NextResponse.json({ 
           success: true, 
-          data: filteredProjects 
+          data: projectsData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
         
       case 'hourly':
+        const hourlyData = firestoreData || mockUsageData.hourlyUsage
         return NextResponse.json({ 
           success: true, 
-          data: mockUsageData.hourlyUsage 
+          data: hourlyData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
         
       case 'errors':
+        const errorsData = firestoreData || mockUsageData.errorLogs
         return NextResponse.json({ 
           success: true, 
-          data: mockUsageData.errorLogs 
+          data: errorsData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
         
       case 'export':
         const format = searchParams.get('format') || 'csv'
         const exportData = {
-          summary: mockUsageData.summary,
-          dailyUsage: mockUsageData.dailyUsage,
-          modelUsage: mockUsageData.modelUsage,
-          projectUsage: mockUsageData.projectUsage,
+          summary: firestoreData?.summary || mockUsageData.summary,
+          dailyUsage: firestoreData?.dailyUsage || mockUsageData.dailyUsage,
+          modelUsage: firestoreData?.modelUsage || mockUsageData.modelUsage,
+          projectUsage: firestoreData?.projectUsage || mockUsageData.projectUsage,
           exportedAt: new Date().toISOString(),
-          period: `${period} days`
+          period: `${period} days`,
+          source: firestoreData ? 'firestore' : 'mock'
         }
         
         return NextResponse.json({ 
@@ -172,7 +363,8 @@ export async function GET(request: NextRequest) {
       default:
         return NextResponse.json({ 
           success: true, 
-          data: mockUsageData 
+          data: firestoreData || mockUsageData,
+          source: firestoreData ? 'firestore' : 'mock'
         })
     }
   } catch (error) {
@@ -195,24 +387,60 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'refresh':
-        // In production, this would trigger a data refresh from the database
-        // For now, we'll simulate a refresh by updating timestamps
-        
+        // Try to refresh data from Firestore, fallback to mock data
         const refreshTimestamp = new Date().toISOString()
         
+        // If Firestore is available, try to get fresh data
+        if (firestoreAvailable) {
+          const freshData = await getUsageFromFirestore(userId, 'all', {})
+          if (freshData) {
+            return NextResponse.json({ 
+              success: true, 
+              data: {
+                ...freshData,
+                lastRefreshed: refreshTimestamp
+              },
+              message: 'Usage data refreshed from Firestore successfully!',
+              source: 'firestore'
+            })
+          }
+        }
+        
+        // Fallback to mock data
         return NextResponse.json({ 
           success: true, 
           data: {
             ...mockUsageData,
             lastRefreshed: refreshTimestamp
           },
-          message: 'Usage data refreshed successfully!'
+          message: 'Usage data refreshed successfully!',
+          source: 'mock'
         })
         
       case 'filter':
         const { period, startDate, endDate, model, projectId } = data
         
-        // Apply filters to the data
+        // Try to get filtered data from Firestore
+        if (firestoreAvailable) {
+          const filteredFirestoreData = await getUsageFromFirestore(userId, 'all', {
+            period,
+            startDate,
+            endDate,
+            model,
+            projectId
+          })
+          
+          if (filteredFirestoreData) {
+            return NextResponse.json({ 
+              success: true, 
+              data: filteredFirestoreData,
+              message: 'Filters applied to Firestore data successfully!',
+              source: 'firestore'
+            })
+          }
+        }
+        
+        // Fallback to mock data filtering
         let filteredData = { ...mockUsageData }
         
         if (startDate && endDate) {
@@ -232,7 +460,29 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ 
           success: true, 
           data: filteredData,
-          message: 'Filters applied successfully!'
+          message: 'Filters applied to mock data successfully!',
+          source: 'mock'
+        })
+        
+      case 'save':
+        // Save usage data to Firestore
+        const { usageData } = data
+        
+        if (firestoreAvailable) {
+          const saved = await saveUsageToFirestore(userId, usageData)
+          if (saved) {
+            return NextResponse.json({ 
+              success: true, 
+              message: 'Usage data saved to Firestore successfully!',
+              source: 'firestore'
+            })
+          }
+        }
+        
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Failed to save usage data',
+          source: 'mock'
         })
         
       default:

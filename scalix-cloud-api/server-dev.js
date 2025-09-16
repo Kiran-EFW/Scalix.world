@@ -205,6 +205,74 @@ app.post('/api/desktop/sync', (req, res) => {
   });
 });
 
+// ==========================================
+// ANALYTICS ENDPOINTS (for frontend)
+// ==========================================
+
+// Live stats endpoint
+app.get('/v1/analytics', (req, res) => {
+  const mockAnalytics = {
+    liveStats: {
+      activeDevelopers: 8920,
+      appsBuilt: 2800,
+      platformUptime: 99.9,
+      avgResponseTime: 1.2
+    },
+    platformStats: {
+      totalUsers: 15420,
+      totalApps: 12000,
+      totalProjects: 45000,
+      totalRevenue: 245000
+    },
+    timestamp: new Date().toISOString()
+  };
+
+  res.json(mockAnalytics);
+});
+
+// Platform stats endpoint
+app.get('/v1/platform-stats', (req, res) => {
+  const mockPlatformStats = {
+    totalUsers: 15420,
+    totalApps: 12000,
+    totalProjects: 45000,
+    totalRevenue: 245000,
+    activeUsers: 8920,
+    newUsersToday: 45,
+    appsBuiltToday: 12,
+    revenueToday: 1250,
+    timestamp: new Date().toISOString()
+  };
+
+  res.json(mockPlatformStats);
+});
+
+// Usage analytics endpoint
+app.get('/v1/usage', (req, res) => {
+  const mockUsage = {
+    summary: {
+      totalRequests: 125430,
+      totalCost: 245.80,
+      totalTokens: 2847392,
+      averageResponseTime: 1.2,
+      successRate: 99.2,
+      period: '30 days'
+    },
+    dailyUsage: [
+      { date: '2025-01-01', requests: 4200, cost: 8.40, tokens: 95000, avgResponseTime: 1.1 },
+      { date: '2025-01-02', requests: 3800, cost: 7.60, tokens: 86000, avgResponseTime: 1.3 },
+      { date: '2025-01-03', requests: 4500, cost: 9.00, tokens: 102000, avgResponseTime: 1.0 }
+    ],
+    modelUsage: [
+      { model: 'Scalix Standard', requests: 45000, cost: 67.50, tokens: 1020000, percentage: 35.9 },
+      { model: 'Scalix Advanced', requests: 38000, cost: 95.00, tokens: 1140000, percentage: 30.3 }
+    ],
+    timestamp: new Date().toISOString()
+  };
+
+  res.json(mockUsage);
+});
+
 // Error handling
 app.use((err, req, res, next) => {
   console.error('Server error:', err);

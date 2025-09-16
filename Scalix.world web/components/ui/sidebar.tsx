@@ -13,7 +13,8 @@ import {
   FolderOpen,
   Menu,
   X,
-  Key
+  Key,
+  AlertTriangle
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -31,6 +32,7 @@ const navigationItems = [
   { name: 'API Keys', href: '/dashboard/api-keys', icon: Key },
   { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
   { name: 'Team', href: '/dashboard/team', icon: Users },
+  { name: 'Error Logs', href: '/dashboard/errors', icon: AlertTriangle },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 

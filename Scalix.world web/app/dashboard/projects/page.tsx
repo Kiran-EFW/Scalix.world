@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { motion } from 'framer-motion'
+import { useRealtimeProjects } from '@/hooks/useRealtimeData'
+import { RealtimeStatusCompact } from '@/components/ui/RealtimeStatus'
 import {
   Plus,
   Search,
@@ -91,6 +93,15 @@ const statusConfig = {
 }
 
 export default function ProjectsPage() {
+  // Real-time data hook
+  const { 
+    data: realtimeProjects, 
+    loading: realtimeLoading, 
+    error: realtimeError,
+    lastUpdate,
+    refresh: refreshRealtime
+  } = useRealtimeProjects('admin', true)
+  
   const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -106,6 +117,13 @@ export default function ProjectsPage() {
   useEffect(() => {
     loadProjects()
   }, [])
+
+  // Sync real-time data with local state
+  useEffect(() => {
+    if (realtimeProjects && realtimeProjects.length > 0) {
+      setProjects(realtimeProjects as Project[])
+    }
+  }, [realtimeProjects])
 
   const loadProjects = async () => {
     setLoading(true)
@@ -233,8 +251,16 @@ export default function ProjectsPage() {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+          <div className="flex items-center space-x-3">
+            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+            <RealtimeStatusCompact />
+          </div>
           <p className="text-gray-600 mt-2">Manage and monitor your AI applications</p>
+          {lastUpdate && (
+            <p className="text-xs text-gray-500 mt-1">
+              Last updated: {lastUpdate.toLocaleTimeString()}
+            </p>
+          )}
         </div>
         <Button 
           onClick={() => setShowCreateModal(true)}
