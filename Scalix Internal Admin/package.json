@@ -4,9 +4,9 @@
   "description": "Internal Admin Portal for Scalix Team Members Only",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3002",
+    "dev": "next dev -p 3004",
     "build": "next build",
-    "start": "next start -p 3002",
+    "start": "next start -p 3004",
     "lint": "next lint"
   },
   "dependencies": {

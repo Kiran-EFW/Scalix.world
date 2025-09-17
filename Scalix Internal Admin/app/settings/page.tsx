@@ -257,6 +257,45 @@ export default function SettingsPage() {
     }
   })
 
+  // Tab configuration
+  const tabs = [
+    {
+      id: 'system',
+      label: 'System',
+      icon: Settings,
+      description: 'System configuration, maintenance, and performance',
+      color: 'blue'
+    },
+    {
+      id: 'security',
+      label: 'Security',
+      icon: Shield,
+      description: 'Authentication, access control, and security policies',
+      color: 'red'
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: Bell,
+      description: 'Alert preferences, webhooks, and communication',
+      color: 'yellow'
+    },
+    {
+      id: 'api',
+      label: 'API',
+      icon: Key,
+      description: 'AI models, rate limits, and API configuration',
+      color: 'purple'
+    },
+    {
+      id: 'appearance',
+      label: 'Appearance',
+      icon: Palette,
+      description: 'Theme, display preferences, and visual settings',
+      color: 'indigo'
+    }
+  ]
+
   // Computed values
   const filteredTabs = useMemo(() => {
     if (!searchQuery) return tabs
@@ -265,7 +304,7 @@ export default function SettingsPage() {
       tab.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tab.description.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
+  }, [searchQuery, tabs])
 
   // Handlers
   const handleSaveSettings = async (data: SettingsFormData) => {
@@ -403,44 +442,6 @@ export default function SettingsPage() {
       return newSet
     })
   }
-
-  const tabs = [
-    {
-      id: 'system',
-      label: 'System',
-      icon: Settings,
-      description: 'System configuration, maintenance, and performance',
-      color: 'blue'
-    },
-    {
-      id: 'security',
-      label: 'Security',
-      icon: Shield,
-      description: 'Authentication, access control, and security policies',
-      color: 'red'
-    },
-    {
-      id: 'notifications',
-      label: 'Notifications',
-      icon: Bell,
-      description: 'Alert preferences, webhooks, and communication',
-      color: 'yellow'
-    },
-    {
-      id: 'api',
-      label: 'API',
-      icon: Key,
-      description: 'AI models, rate limits, and API configuration',
-      color: 'purple'
-    },
-    {
-      id: 'appearance',
-      label: 'Appearance',
-      icon: Palette,
-      description: 'Theme, display preferences, and visual settings',
-      color: 'indigo'
-    }
-  ];
 
   return (
     <ProtectedRoute requiredPermissions={['system_settings']}>

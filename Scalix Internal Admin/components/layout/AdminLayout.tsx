@@ -28,7 +28,8 @@ import {
   Building2,
   DollarSign,
   MessageSquare,
-  Eye
+  Eye,
+  FileText
 } from 'lucide-react'
 import { LogoAdmin } from '@/components/ui/logo'
 import { cn } from '@/lib/utils'
@@ -42,6 +43,7 @@ interface AdminLayoutProps {
 
 const navigationItems = [
   { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Content Management', href: '/content-management', icon: FileText },
   { name: 'Metrics', href: '/metrics', icon: BarChart3 },
   { name: 'Activity', href: '/activity', icon: Activity },
   { name: 'System Health', href: '/system-health', icon: Shield },

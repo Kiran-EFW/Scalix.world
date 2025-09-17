@@ -4,89 +4,10 @@ import { motion } from 'framer-motion'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/Button'
+import { ContentSection, TutorialContentSection } from '@/components/ui/ContentSection'
 import Link from 'next/link'
-import { Book, Code, Play, Settings, Users, Zap, Search, ArrowRight } from 'lucide-react'
-
-const docSections = [
-  {
-    icon: <Play className="w-6 h-6" />,
-    title: 'Getting Started',
-    description: 'Quick start guide to get Scalix up and running on your machine',
-    items: [
-      'Installation & Setup',
-      'First AI Project',
-      'Basic Configuration',
-      'Troubleshooting'
-    ],
-    color: 'bg-blue-500',
-    href: '/docs/getting-started'
-  },
-  {
-    icon: <Code className="w-6 h-6" />,
-    title: 'API Reference',
-    description: 'Complete API documentation for integrating with Scalix',
-    items: [
-      'REST API Endpoints',
-      'Authentication',
-      'Rate Limits',
-      'Error Handling'
-    ],
-    color: 'bg-green-500',
-    href: '/dashboard/api-keys'
-  },
-  {
-    icon: <Settings className="w-6 h-6" />,
-    title: 'Configuration',
-    description: 'Advanced configuration options and customization',
-    items: [
-      'Environment Setup',
-      'Model Configuration',
-      'Security Settings',
-      'Performance Tuning'
-    ],
-    color: 'bg-purple-500',
-    href: '/docs/configuration'
-  },
-  {
-    icon: <Zap className="w-6 h-6" />,
-    title: 'AI Models',
-    description: 'Guide to using different AI models and providers',
-    items: [
-      'Supported Models',
-      'Model Selection',
-      'Custom Models',
-      'Performance Comparison'
-    ],
-    color: 'bg-yellow-500',
-    href: '/docs/models'
-  },
-  {
-    icon: <Users className="w-6 h-6" />,
-    title: 'Team Collaboration',
-    description: 'Working with teams and sharing projects',
-    items: [
-      'Team Setup',
-      'Project Sharing',
-      'Access Control',
-      'Collaboration Tools'
-    ],
-    color: 'bg-red-500',
-    href: '/docs/collaboration'
-  },
-  {
-    icon: <Book className="w-6 h-6" />,
-    title: 'Best Practices',
-    description: 'Tips and best practices for optimal AI development',
-    items: [
-      'Prompt Engineering',
-      'Cost Optimization',
-      'Security Guidelines',
-      'Performance Tips'
-    ],
-    color: 'bg-indigo-500',
-    href: '/docs/best-practices'
-  }
-]
+import { Search, ArrowRight } from 'lucide-react'
+import { ContentManager } from '@/lib/content'
 
 const quickLinks = [
   { title: 'Get API Key', href: '/dashboard/api-keys', description: 'Generate and manage your Scalix API keys' },
@@ -98,36 +19,7 @@ const quickLinks = [
   { title: 'Support Center', href: '/support', description: 'Contact our support team' }
 ]
 
-const tutorials = [
-  {
-    title: 'Building Your First AI Chatbot',
-    description: 'Learn how to create a conversational AI assistant using Scalix',
-    difficulty: 'Beginner',
-    duration: '15 min',
-    href: '/docs/tutorials/chatbot'
-  },
-  {
-    title: 'Integrating Multiple AI Models',
-    description: 'Combine different AI models for better performance',
-    difficulty: 'Intermediate',
-    duration: '25 min',
-    href: '/docs/tutorials/multi-model'
-  },
-  {
-    title: 'Local AI Model Fine-tuning',
-    description: 'Customize AI models for your specific use case',
-    difficulty: 'Advanced',
-    duration: '45 min',
-    href: '/docs/tutorials/fine-tuning'
-  },
-  {
-    title: 'Building a Code Review Assistant',
-    description: 'Create an AI-powered code review tool',
-    difficulty: 'Intermediate',
-    duration: '30 min',
-    href: '/docs/tutorials/code-review'
-  }
-]
+// Content is now managed through the ContentManager
 
 export default function DocsPage() {
   return (
@@ -181,126 +73,43 @@ export default function DocsPage() {
       </section>
 
       {/* Main Documentation Sections */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Documentation Sections
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore our comprehensive documentation organized by topic
-            </p>
-          </motion.div>
+      {(() => {
+        // Combine all docs sections into one display section
+        const gettingStartedSection = ContentManager.getSection('docs.gettingStarted')
+        const apiReferenceSection = ContentManager.getSection('docs.apiReference')
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {docSections.map((section, index) => (
-              <motion.div
-                key={section.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
-              >
-                <div className={`inline-flex p-3 rounded-lg ${section.color} text-white mb-4`}>
-                  {section.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {section.title}
-                </h3>
-                <p className="text-gray-600 mb-4 leading-relaxed">
-                  {section.description}
-                </p>
-                <ul className="space-y-1 mb-6">
-                  {section.items.map((item, itemIndex) => (
-                    <li key={itemIndex} className="text-sm text-gray-500 flex items-center">
-                      <div className="w-1 h-1 bg-gray-400 rounded-full mr-2"></div>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link href={section.href}>
-                  <Button variant="outline" className="w-full">
-                    Explore {section.title}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+        if (gettingStartedSection && apiReferenceSection) {
+          const combinedSection = {
+            id: 'documentation-sections',
+            title: 'Documentation Sections',
+            description: 'Explore our comprehensive documentation organized by topic',
+            tiles: [...gettingStartedSection.tiles, ...apiReferenceSection.tiles],
+            layout: 'grid' as const
+          }
+
+          return (
+            <ContentSection
+              section={combinedSection}
+              variant="featured"
+              showViewAll={true}
+              viewAllHref="/docs/all"
+            />
+          )
+        }
+        return null
+      })()}
 
       {/* Tutorials Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Hands-on Tutorials
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Learn by doing with our step-by-step tutorials
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {tutorials.map((tutorial, index) => (
-              <motion.div
-                key={tutorial.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {tutorial.title}
-                    </h3>
-                    <p className="text-gray-600 mb-3">
-                      {tutorial.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      tutorial.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' :
-                      tutorial.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {tutorial.difficulty}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {tutorial.duration}
-                    </span>
-                  </div>
-                  <Link href={tutorial.href}>
-                    <Button variant="outline" size="sm">
-                      Start Tutorial
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {(() => {
+        const beginnerTutorials = ContentManager.getSection('tutorials.beginner')
+        return beginnerTutorials ? (
+          <TutorialContentSection
+            section={beginnerTutorials}
+            showViewAll={true}
+            viewAllHref="/tutorials"
+          />
+        ) : null
+      })()}
 
       {/* Quick Links */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
